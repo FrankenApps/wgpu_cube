@@ -22,7 +22,7 @@ fn main(
     model: VertexInput,
 ) -> VertexOutput {
     var out: VertexOutput;
-    //out.tex_coords = model.tex_coords;
+    out.tex_coords = model.tex_coords;
     out.clip_position = camera.view_proj * vec4<f32>(model.position, 1.0);
     return out;
 }
@@ -36,6 +36,6 @@ var s_diffuse: sampler;
 
 [[stage(fragment)]]
 fn main(in: VertexOutput) -> [[location(0)]] vec4<f32> {
-    //return textureSample(t_diffuse, s_diffuse, in.tex_coords);
-    return vec4<f32>(0.5, 0.0, 0.0, 1.0);
+    return textureSample(t_diffuse, s_diffuse, in.tex_coords);
+    //return vec4<f32>(0.5, 0.0, 0.0, 1.0);
 }
