@@ -1,6 +1,6 @@
 use std::iter;
 
-use cgmath::InnerSpace;
+use cgmath::{InnerSpace, Rotation3};
 use wgpu::util::DeviceExt;
 use winit::{
     event::*,
@@ -19,7 +19,6 @@ struct Vertex {
     tangent: [f32; 3],
     bitangent: [f32; 3],
 }
-
 
 impl Vertex {
     fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
@@ -209,6 +208,16 @@ impl CameraController {
     }
 }
 
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+struct LightUniform {
+    position: [f32; 3],
+    // Due to uniforms requiring 16 byte (4 float) spacing, we need to use a padding field here
+    _padding: u32,
+    color: [f32; 3],
+}
+
 struct State {
     surface: wgpu::Surface,
     device: wgpu::Device,
@@ -228,6 +237,9 @@ struct State {
     camera_uniform: CameraUniform,
     camera_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
+    light_uniform: LightUniform,
+    light_buffer: wgpu::Buffer,
+    light_bind_group: wgpu::BindGroup,
 }
 
 impl State {
@@ -357,6 +369,42 @@ impl State {
             label: Some("camera_bind_group"),
         });
 
+        let light_uniform = LightUniform {
+            position: [2.0, 6.0, 4.0],
+            _padding: 0,
+            color: [1.0, 1.0, 1.0],
+        };
+
+        let light_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Light VB"),
+            contents: bytemuck::cast_slice(&[light_uniform]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
+        let light_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }],
+                label: None,
+            });
+
+        let light_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &light_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: light_buffer.as_entire_binding(),
+            }],
+            label: None,
+        });
+
         let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
@@ -365,7 +413,7 @@ impl State {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[&texture_bind_group_layout, &camera_bind_group_layout],
+                bind_group_layouts: &[&texture_bind_group_layout, &camera_bind_group_layout, &light_bind_group_layout],
                 push_constant_ranges: &[],
             });
 
@@ -447,6 +495,9 @@ impl State {
             camera_buffer,
             camera_bind_group,
             camera_uniform,
+            light_uniform,
+            light_buffer,
+            light_bind_group,
         }
     }
 
@@ -474,6 +525,13 @@ impl State {
             0,
             bytemuck::cast_slice(&[self.camera_uniform]),
         );
+
+        // Update the light so that it is transformed with the camera
+        /* let old_position: cgmath::Vector3<_> = self.light_uniform.position.into();
+        self.light_uniform.position =
+            (cgmath::Quaternion::from_axis_angle([0.0, 1.0, 0.0].into(), cgmath::Deg(1.0))
+                * old_position).into();
+        self.queue.write_buffer(&self.light_buffer, 0, bytemuck::cast_slice(&[self.light_uniform])); */
     }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -517,6 +575,7 @@ impl State {
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
             render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
+            render_pass.set_bind_group(2, &self.light_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
             render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
@@ -537,28 +596,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
     vertices.push(Vertex {
         position: [0.0, 0.0, 1.0].into(),
         tex_coords: [0.0, 1.0].into(),
-        normal: [0.0, 0.0, -1.0].into(),
+        normal: [0.0, 0.0, 1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 0.0, 1.0].into(),
         tex_coords: [1.0, 1.0].into(),
-        normal: [0.0, 0.0, -1.0].into(),
+        normal: [0.0, 0.0, 1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [0.0, 1.0, 1.0].into(),
         tex_coords: [0.0, 0.0].into(),
-        normal: [0.0, 0.0, -1.0].into(),
+        normal: [0.0, 0.0, 1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 1.0, 1.0].into(),
         tex_coords: [1.0, 0.0].into(),
-        normal: [0.0, 0.0, -1.0].into(),
+        normal: [0.0, 0.0, 1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
@@ -567,28 +626,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
     vertices.push(Vertex {
         position: [0.0, 0.0, 0.0].into(),
         tex_coords: [0.0, 1.0].into(),
-        normal: [0.0, 0.0, 1.0].into(),
+        normal: [0.0, 0.0, -1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 0.0, 0.0].into(),
         tex_coords: [1.0, 1.0].into(),
-        normal: [0.0, 0.0, 1.0].into(),
+        normal: [0.0, 0.0, -1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [0.0, 1.0, 0.0].into(),
         tex_coords: [0.0, 0.0].into(),
-        normal: [0.0, 0.0, 1.0].into(),
+        normal: [0.0, 0.0, -1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 1.0, 0.0].into(),
         tex_coords: [1.0, 0.0].into(),
-        normal: [0.0, 0.0, 1.0].into(),
+        normal: [0.0, 0.0, -1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
@@ -597,28 +656,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
     vertices.push(Vertex {
         position: [0.0, 0.0, 0.0].into(),
         tex_coords: [0.0, 1.0].into(),
-        normal: [1.0, 0.0, 0.0].into(),
+        normal: [-1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [0.0, 1.0, 0.0].into(),
         tex_coords: [0.0, 0.0].into(),
-        normal: [1.0, 0.0, 0.0].into(),
+        normal: [-1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [0.0, 0.0, 1.0].into(),
         tex_coords: [1.0, 1.0].into(),
-        normal: [1.0, 0.0, 0.0].into(),
+        normal: [-1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [0.0, 1.0, 1.0].into(),
         tex_coords: [1.0, 0.0].into(),
-        normal: [1.0, 0.0, 0.0].into(),
+        normal: [-1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
@@ -627,28 +686,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
     vertices.push(Vertex {
         position: [1.0, 0.0, 0.0].into(),
         tex_coords: [0.0, 1.0].into(),
-        normal: [-1.0, 0.0, 0.0].into(),
+        normal: [1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 1.0, 0.0].into(),
         tex_coords: [0.0, 0.0].into(),
-        normal: [-1.0, 0.0, 0.0].into(),
+        normal: [1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 0.0, 1.0].into(),
         tex_coords: [1.0, 1.0].into(),
-        normal: [-1.0, 0.0, 0.0].into(),
+        normal: [1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 1.0, 1.0].into(),
         tex_coords: [1.0, 0.0].into(),
-        normal: [-1.0, 0.0, 0.0].into(),
+        normal: [1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
@@ -657,28 +716,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
     vertices.push(Vertex {
         position: [0.0, 1.0, 0.0].into(),
         tex_coords: [0.0, 0.0].into(),
-        normal: [0.0, -1.0, 0.0].into(),
+        normal: [0.0, 1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [0.0, 1.0, 1.0].into(),
         tex_coords: [0.0, 1.0].into(),
-        normal: [0.0, -1.0, 0.0].into(),
+        normal: [0.0, 1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 1.0, 0.0].into(),
         tex_coords: [1.0, 0.0].into(),
-        normal: [0.0, -1.0, 0.0].into(),
+        normal: [0.0, 1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 1.0, 1.0].into(),
         tex_coords: [1.0, 1.0].into(),
-        normal: [0.0, -1.0, 0.0].into(),
+        normal: [0.0, 1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
@@ -687,28 +746,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
     vertices.push(Vertex {
         position: [0.0, 0.0, 0.0].into(),
         tex_coords: [0.0, 0.0].into(),
-        normal: [0.0, 1.0, 0.0].into(),
+        normal: [0.0, -1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [0.0, 0.0, 1.0].into(),
         tex_coords: [1.0, 0.0].into(),
-        normal: [0.0, 1.0, 0.0].into(),
+        normal: [0.0, -1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 0.0, 0.0].into(),
         tex_coords: [0.0, 1.0].into(),
-        normal: [0.0, 1.0, 0.0].into(),
+        normal: [0.0, -1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
         position: [1.0, 0.0, 1.0].into(),
         tex_coords: [1.0, 1.0].into(),
-        normal: [0.0, 1.0, 0.0].into(),
+        normal: [0.0, -1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
