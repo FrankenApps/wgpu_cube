@@ -1,6 +1,6 @@
 use std::iter;
 
-use cgmath::{InnerSpace, Rotation3};
+use cgmath::{InnerSpace, SquareMatrix};
 use wgpu::util::DeviceExt;
 use winit::{
     event::*,
@@ -85,20 +85,23 @@ impl Camera {
 }
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 struct CameraUniform {
+    view_position: [f32; 4],
     view_proj: [[f32; 4]; 4],
 }
 
 impl CameraUniform {
     fn new() -> Self {
-        use cgmath::SquareMatrix;
         Self {
+            view_position: [0.0; 4],
             view_proj: cgmath::Matrix4::identity().into(),
         }
     }
 
     fn update_view_proj(&mut self, camera: &Camera) {
+        // We're using Vector4 because of the uniforms 16 byte spacing requirement
+        self.view_position = camera.eye.to_homogeneous().into();
         self.view_proj = (OPENGL_TO_WGPU_MATRIX * camera.build_view_projection_matrix()).into();
     }
 }
@@ -349,7 +352,7 @@ impl State {
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 entries: &[wgpu::BindGroupLayoutEntry {
                     binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX,
+                    visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
                     ty: wgpu::BindingType::Buffer {
                         ty: wgpu::BufferBindingType::Uniform,
                         has_dynamic_offset: false,
@@ -527,11 +530,11 @@ impl State {
         );
 
         // Update the light so that it is transformed with the camera
-        /* let old_position: cgmath::Vector3<_> = self.light_uniform.position.into();
-        self.light_uniform.position =
-            (cgmath::Quaternion::from_axis_angle([0.0, 1.0, 0.0].into(), cgmath::Deg(1.0))
-                * old_position).into();
-        self.queue.write_buffer(&self.light_buffer, 0, bytemuck::cast_slice(&[self.light_uniform])); */
+        self.light_uniform.position = [
+            self.camera_uniform.view_position[0],
+            self.camera_uniform.view_position[1],
+            self.camera_uniform.view_position[2]];
+        self.queue.write_buffer(&self.light_buffer, 0, bytemuck::cast_slice(&[self.light_uniform]));
     }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
