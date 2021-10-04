@@ -157,7 +157,7 @@ impl CameraController {
                         window.request_redraw();
                         true
                     }
-                    VirtualKeyCode::A | VirtualKeyCode::Left => {
+                    VirtualKeyCode::D | VirtualKeyCode::Right => {
                         self.is_left_pressed = is_pressed;
                         window.request_redraw();
                         true
@@ -167,7 +167,7 @@ impl CameraController {
                         window.request_redraw();
                         true
                     }
-                    VirtualKeyCode::D | VirtualKeyCode::Right => {
+                    VirtualKeyCode::A | VirtualKeyCode::Left => {
                         self.is_right_pressed = is_pressed;
                         window.request_redraw();
                         true
@@ -281,9 +281,9 @@ impl State {
         };
         surface.configure(&device, &config);
 
-        let diffuse_bytes = include_bytes!("happy-tree.png");
+        let diffuse_bytes = include_bytes!("texture.png");
         let diffuse_texture =
-            texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "happy-tree.png").unwrap();
+            texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "texture.png").unwrap();
 
         let texture_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -597,28 +597,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
 
     // Front
     vertices.push(Vertex {
-        position: [0.0, 0.0, 1.0].into(),
+        position: [-0.5, -0.5, 0.5].into(),
         tex_coords: [0.0, 1.0].into(),
         normal: [0.0, 0.0, 1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [1.0, 0.0, 1.0].into(),
+        position: [0.5, -0.5, 0.5].into(),
         tex_coords: [1.0, 1.0].into(),
         normal: [0.0, 0.0, 1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [0.0, 1.0, 1.0].into(),
+        position: [-0.5, 0.5, 0.5].into(),
         tex_coords: [0.0, 0.0].into(),
         normal: [0.0, 0.0, 1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [1.0, 1.0, 1.0].into(),
+        position: [0.5, 0.5, 0.5].into(),
         tex_coords: [1.0, 0.0].into(),
         normal: [0.0, 0.0, 1.0].into(),
         tangent: [0.0; 3].into(),
@@ -627,29 +627,29 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
 
     // Back
     vertices.push(Vertex {
-        position: [0.0, 0.0, 0.0].into(),
-        tex_coords: [0.0, 1.0].into(),
-        normal: [0.0, 0.0, -1.0].into(),
-        tangent: [0.0; 3].into(),
-        bitangent: [0.0; 3].into(),
-    });
-    vertices.push(Vertex {
-        position: [1.0, 0.0, 0.0].into(),
+        position: [-0.5, -0.5, -0.5].into(),
         tex_coords: [1.0, 1.0].into(),
         normal: [0.0, 0.0, -1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [0.0, 1.0, 0.0].into(),
-        tex_coords: [0.0, 0.0].into(),
+        position: [0.5, -0.5, -0.5].into(),
+        tex_coords: [0.0, 1.0].into(),
         normal: [0.0, 0.0, -1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [1.0, 1.0, 0.0].into(),
+        position: [-0.5, 0.5, -0.5].into(),
         tex_coords: [1.0, 0.0].into(),
+        normal: [0.0, 0.0, -1.0].into(),
+        tangent: [0.0; 3].into(),
+        bitangent: [0.0; 3].into(),
+    });
+    vertices.push(Vertex {
+        position: [0.5, 0.5, -0.5].into(),
+        tex_coords: [0.0, 0.0].into(),
         normal: [0.0, 0.0, -1.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
@@ -657,28 +657,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
 
     // Left
     vertices.push(Vertex {
-        position: [0.0, 0.0, 0.0].into(),
+        position: [-0.5, -0.5, -0.5].into(),
         tex_coords: [0.0, 1.0].into(),
         normal: [-1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [0.0, 1.0, 0.0].into(),
+        position: [-0.5, 0.5, -0.5].into(),
         tex_coords: [0.0, 0.0].into(),
         normal: [-1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [0.0, 0.0, 1.0].into(),
+        position: [-0.5, -0.5, 0.5].into(),
         tex_coords: [1.0, 1.0].into(),
         normal: [-1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [0.0, 1.0, 1.0].into(),
+        position: [-0.5, 0.5, 0.5].into(),
         tex_coords: [1.0, 0.0].into(),
         normal: [-1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
@@ -687,29 +687,29 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
 
     // Right
     vertices.push(Vertex {
-        position: [1.0, 0.0, 0.0].into(),
-        tex_coords: [0.0, 1.0].into(),
-        normal: [1.0, 0.0, 0.0].into(),
-        tangent: [0.0; 3].into(),
-        bitangent: [0.0; 3].into(),
-    });
-    vertices.push(Vertex {
-        position: [1.0, 1.0, 0.0].into(),
-        tex_coords: [0.0, 0.0].into(),
-        normal: [1.0, 0.0, 0.0].into(),
-        tangent: [0.0; 3].into(),
-        bitangent: [0.0; 3].into(),
-    });
-    vertices.push(Vertex {
-        position: [1.0, 0.0, 1.0].into(),
+        position: [0.5, -0.5, -0.5].into(),
         tex_coords: [1.0, 1.0].into(),
         normal: [1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [1.0, 1.0, 1.0].into(),
+        position: [0.5, 0.5, -0.5].into(),
         tex_coords: [1.0, 0.0].into(),
+        normal: [1.0, 0.0, 0.0].into(),
+        tangent: [0.0; 3].into(),
+        bitangent: [0.0; 3].into(),
+    });
+    vertices.push(Vertex {
+        position: [0.5, -0.5, 0.5].into(),
+        tex_coords: [0.0, 1.0].into(),
+        normal: [1.0, 0.0, 0.0].into(),
+        tangent: [0.0; 3].into(),
+        bitangent: [0.0; 3].into(),
+    });
+    vertices.push(Vertex {
+        position: [0.5, 0.5, 0.5].into(),
+        tex_coords: [0.0, 0.0].into(),
         normal: [1.0, 0.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
@@ -717,28 +717,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
 
     // Top
     vertices.push(Vertex {
-        position: [0.0, 1.0, 0.0].into(),
+        position: [-0.5, 0.5, -0.5].into(),
         tex_coords: [0.0, 0.0].into(),
         normal: [0.0, 1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [0.0, 1.0, 1.0].into(),
+        position: [-0.5, 0.5, 0.5].into(),
         tex_coords: [0.0, 1.0].into(),
         normal: [0.0, 1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [1.0, 1.0, 0.0].into(),
+        position: [0.5, 0.5, -0.5].into(),
         tex_coords: [1.0, 0.0].into(),
         normal: [0.0, 1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [1.0, 1.0, 1.0].into(),
+        position: [0.5, 0.5, 0.5].into(),
         tex_coords: [1.0, 1.0].into(),
         normal: [0.0, 1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
@@ -747,28 +747,28 @@ fn construct_box() -> (Vec<Vertex>, Vec<u16>) {
 
     // Bottom
     vertices.push(Vertex {
-        position: [0.0, 0.0, 0.0].into(),
+        position: [-0.5, -0.5, -0.5].into(),
         tex_coords: [0.0, 0.0].into(),
         normal: [0.0, -1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [0.0, 0.0, 1.0].into(),
+        position: [-0.5, -0.5, 0.5].into(),
         tex_coords: [1.0, 0.0].into(),
         normal: [0.0, -1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [1.0, 0.0, 0.0].into(),
+        position: [0.5, -0.5, -0.5].into(),
         tex_coords: [0.0, 1.0].into(),
         normal: [0.0, -1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
         bitangent: [0.0; 3].into(),
     });
     vertices.push(Vertex {
-        position: [1.0, 0.0, 1.0].into(),
+        position: [0.5, -0.5, 0.5].into(),
         tex_coords: [1.0, 1.0].into(),
         normal: [0.0, -1.0, 0.0].into(),
         tangent: [0.0; 3].into(),
