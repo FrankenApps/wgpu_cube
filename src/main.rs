@@ -1,6 +1,6 @@
 use std::iter;
 
-use cgmath::{InnerSpace, SquareMatrix};
+use glam::{Mat3, Mat4, Vec3};
 use wgpu::util::DeviceExt;
 use winit::{
     event::*,
@@ -58,18 +58,10 @@ impl Vertex {
     }
 }
 
-#[rustfmt::skip]
-pub const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
-    1.0, 0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0, 0.0,
-    0.0, 0.0, 0.5, 0.0,
-    0.0, 0.0, 0.5, 1.0,
-);
-
 struct Camera {
-    eye: cgmath::Point3<f32>,
-    target: cgmath::Point3<f32>,
-    up: cgmath::Vector3<f32>,
+    eye: Vec3,
+    target: Vec3,
+    up: Vec3,
     aspect: f32,
     fovy: f32,
     znear: f32,
@@ -77,9 +69,9 @@ struct Camera {
 }
 
 impl Camera {
-    fn build_view_projection_matrix(&self) -> cgmath::Matrix4<f32> {
-        let view = cgmath::Matrix4::look_at_rh(self.eye, self.target, self.up);
-        let proj = cgmath::perspective(cgmath::Deg(self.fovy), self.aspect, self.znear, self.zfar);
+    fn build_view_projection_matrix(&self) -> Mat4 {
+        let view = Mat4::look_at_rh(self.eye, self.target, self.up);
+        let proj = Mat4::perspective_rh(self.fovy, self.aspect, self.znear, self.zfar);
         proj * view
     }
 }
@@ -95,14 +87,22 @@ impl CameraUniform {
     fn new() -> Self {
         Self {
             view_position: [0.0; 4],
-            view_proj: cgmath::Matrix4::identity().into(),
+            view_proj: Mat4::IDENTITY.to_cols_array_2d(),
         }
     }
 
     fn update_view_proj(&mut self, camera: &Camera) {
+        #[rustfmt::skip]
+        let opengl_to_wgpu_matrix = Mat4::from_cols_array(&[
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 0.5, 0.0,
+            0.0, 0.0, 0.5, 1.0,
+        ]);
+
         // We're using Vector4 because of the uniforms 16 byte spacing requirement
-        self.view_position = camera.eye.to_homogeneous().into();
-        self.view_proj = (OPENGL_TO_WGPU_MATRIX * camera.build_view_projection_matrix()).into();
+        self.view_position = [camera.eye.to_array()[0], camera.eye.to_array()[1], camera.eye.to_array()[2], 0.0];
+        self.view_proj = (opengl_to_wgpu_matrix * camera.build_view_projection_matrix()).to_cols_array_2d();
     }
 }
 
@@ -110,8 +110,8 @@ struct CameraController {
     speed: f32,
     is_up_pressed: bool,
     is_down_pressed: bool,
-    is_forward_pressed: bool,
-    is_backward_pressed: bool,
+    is_zoom_in_pressed: bool,
+    is_zoom_out_pressed: bool,
     is_left_pressed: bool,
     is_right_pressed: bool,
 }
@@ -122,8 +122,8 @@ impl CameraController {
             speed,
             is_up_pressed: false,
             is_down_pressed: false,
-            is_forward_pressed: false,
-            is_backward_pressed: false,
+            is_zoom_in_pressed: false,
+            is_zoom_out_pressed: false,
             is_left_pressed: false,
             is_right_pressed: false,
         }
@@ -142,18 +142,18 @@ impl CameraController {
             } => {
                 let is_pressed = *state == ElementState::Pressed;
                 match keycode {
-                    VirtualKeyCode::Space => {
+                    VirtualKeyCode::Space | VirtualKeyCode::Y => {
                         self.is_up_pressed = is_pressed;
                         window.request_redraw();
                         true
                     }
-                    VirtualKeyCode::LShift => {
+                    VirtualKeyCode::LShift | VirtualKeyCode::Q => {
                         self.is_down_pressed = is_pressed;
                         window.request_redraw();
                         true
                     }
                     VirtualKeyCode::W | VirtualKeyCode::Up => {
-                        self.is_forward_pressed = is_pressed;
+                        self.is_zoom_in_pressed = is_pressed;
                         window.request_redraw();
                         true
                     }
@@ -163,7 +163,7 @@ impl CameraController {
                         true
                     }
                     VirtualKeyCode::S | VirtualKeyCode::Down => {
-                        self.is_backward_pressed = is_pressed;
+                        self.is_zoom_out_pressed = is_pressed;
                         window.request_redraw();
                         true
                     }
@@ -180,33 +180,29 @@ impl CameraController {
     }
 
     fn update_camera(&self, camera: &mut Camera) {
-        let forward = camera.target - camera.eye;
-        let forward_norm = forward.normalize();
-        let forward_mag = forward.magnitude();
+        let mut spherical_coords = cartesian_to_spherical_coords(camera.eye);
 
-        // Prevents glitching when camera gets too close to the
-        // center of the scene.
-        if self.is_forward_pressed && forward_mag > self.speed {
-            camera.eye += forward_norm * self.speed;
+        if self.is_zoom_in_pressed {
+            spherical_coords.x -= self.speed;
+            camera.eye = spherical_to_cartesian_coords(spherical_coords);
         }
-        if self.is_backward_pressed {
-            camera.eye -= forward_norm * self.speed;
+        if self.is_zoom_out_pressed {
+            spherical_coords.x += self.speed;
+            camera.eye = spherical_to_cartesian_coords(spherical_coords);
         }
-
-        let right = forward_norm.cross(camera.up);
-
-        // Redo radius calc in case the up/ down is pressed.
-        let forward = camera.target - camera.eye;
-        let forward_mag = forward.magnitude();
 
         if self.is_right_pressed {
-            // Rescale the distance between the target and eye so
-            // that it doesn't change. The eye therefore still
-            // lies on the circle made by the target and eye.
-            camera.eye = camera.target - (forward + right * self.speed).normalize() * forward_mag;
+            camera.eye = Mat3::from_rotation_y(self.speed) * camera.eye;
         }
         if self.is_left_pressed {
-            camera.eye = camera.target - (forward - right * self.speed).normalize() * forward_mag;
+            camera.eye = Mat3::from_rotation_y(-self.speed) * camera.eye;
+        }
+
+        if self.is_up_pressed {
+            camera.eye = Mat3::from_rotation_x(-self.speed) * camera.eye;
+        }
+        if self.is_down_pressed {
+            camera.eye = Mat3::from_rotation_x(self.speed) * camera.eye;
         }
     }
 }
@@ -328,16 +324,19 @@ impl State {
         let depth_texture =
             texture::Texture::create_depth_texture(&device, &config, "depth_texture");
 
+        let eye_pos = spherical_to_cartesian_coords(Vec3::new(7.0, 1.5, 1.25));
+
         let camera = Camera {
-            eye: (0.0, 1.0, 2.0).into(),
+            //eye: (0.0, 2.0, 2.0).into(),
+            eye: eye_pos.into(),
             target: (0.0, 0.0, 0.0).into(),
-            up: cgmath::Vector3::unit_y(),
+            up: Vec3::new(0.0, 1.0, 0.0),
             aspect: config.width as f32 / config.height as f32,
             fovy: 45.0,
             znear: 0.1,
             zfar: 100.0,
         };
-        let camera_controller = CameraController::new(0.2);
+        let camera_controller = CameraController::new(0.1);
 
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera);
@@ -897,4 +896,57 @@ fn main() {
             _ => {}
         }
     });
+}
+
+#[allow(unused_macros)]
+macro_rules! assert_delta_point {
+    ($x:expr, $y:expr, $d:expr) => {
+        if !($x.x - $y.x < $d.x || $y.x - $x.x < $d.x) { panic!(); }
+
+        if !($x.y - $y.y < $d.y || $y.y - $x.y < $d.y) { panic!(); }
+
+        if !($x.z - $y.z < $d.z || $y.z - $x.z < $d.z) { panic!(); }
+    }
+}
+
+fn cartesian_to_spherical_coords(p: Vec3) -> Vec3 {
+    let r = (p.x * p.x + p.y * p.y + p.z * p.z).sqrt();
+    // Remember that y is the coordinate axis that points up.
+    let theta = p.y.atan2(p.x);
+    let phi = (p.z / r).acos();
+
+    Vec3::new(r, theta, phi)
+}
+
+#[test]
+fn test_spherical_to_polar_coords() {
+    let delta = Vec3::new(f32::EPSILON, f32::EPSILON, f32::EPSILON);
+
+    let spherical = cartesian_to_spherical_coords(Vec3::new(1.0, 0.0, 1.0));
+    assert_delta_point!(spherical, Vec3::new(2.0f32.sqrt(), 0.0, std::f32::consts::PI / 4.0), delta);
+
+    let spherical = cartesian_to_spherical_coords(Vec3::new(1.0, 0.0, 0.0));
+    assert_delta_point!(spherical, Vec3::new(1.0f32.sqrt(), 0.0, std::f32::consts::PI / 2.0), delta);
+
+    let spherical = cartesian_to_spherical_coords(Vec3::new(1.0, 1.0, 1.0));
+    assert_delta_point!(spherical, Vec3::new(3.0f32.sqrt(), std::f32::consts::PI / 4.0, 0.95531666), delta);
+
+    let spherical = cartesian_to_spherical_coords(Vec3::new(1.0, 1.0, 0.0));
+    assert_delta_point!(spherical, Vec3::new(2.0f32.sqrt(), std::f32::consts::PI / 4.0, std::f32::consts::PI / 2.0), delta);
+}
+
+fn spherical_to_cartesian_coords(p: Vec3) -> Vec3 {
+    let x = p.x * p.y.sin() * p.z.cos();
+    let y = p.x * p.y.sin() * p.z.sin();
+    let z = p.x * p.z.cos();
+
+    Vec3::new(x, y, z)
+}
+
+#[test]
+fn test_spherical_to_cartesian_coords() {
+    let delta = Vec3::new(f32::EPSILON, f32::EPSILON, f32::EPSILON);
+
+    let cartesian = spherical_to_cartesian_coords(Vec3::new(5.0, std::f32::consts::PI / 2.0, 0.0));
+    assert_delta_point!(cartesian, Vec3::new(5.0, 0.0, 0.0), delta);
 }
