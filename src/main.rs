@@ -31,6 +31,8 @@ fn main() {
         .build(&event_loop)
         .unwrap();
 
+    println!("Window shown in {:.2?}.", before.elapsed());
+
     // State::new uses async code, so we're going to wait for it to finish
     let mut state = pollster::block_on(State::new(&window));
 

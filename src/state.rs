@@ -266,7 +266,11 @@ impl State {
             },
         });
 
-        let (vertices, indices) = get_box_vertecies();
+        let (vertices, indices) = get_box_vertecies(
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(1.0, 1.0, 1.0),
+            Vec3::new(0.0, 0.0, 0.0)
+        );
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
