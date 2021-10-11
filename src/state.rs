@@ -267,10 +267,30 @@ impl State {
         });
 
         let (vertices, indices) = get_box_vertecies(
+            0,
             Vec3::new(0.0, 0.0, 0.0),
             Vec3::new(1.0, 1.0, 1.0),
             Vec3::new(0.0, 0.0, 0.0)
         );
+
+        /* let mut vertices = Vec::new();
+        let mut indices = Vec::new();
+        let mut indices_count: u16 = 0;
+        for x in -5..5 {
+            for y in 0..15 {
+                for z in -5..5 {
+                    let (mut vertices_temp, mut indices_temp) = get_box_vertecies(
+                        indices_count,
+                        Vec3::new(x as f32, y as f32, z as f32),
+                        Vec3::new(0.9, 0.9, 0.9),
+                        Vec3::new(0.0, 0.0, 0.0)
+                    );
+                    indices_count += 24;
+                    vertices.append(&mut vertices_temp);
+                    indices.append(&mut indices_temp);
+                }
+            }
+        } */
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),

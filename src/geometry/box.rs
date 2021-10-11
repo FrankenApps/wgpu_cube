@@ -11,6 +11,7 @@ use crate::vertex::Vertex;
 /// * `rotation`: The `XYZ` - Euler angles which represent the rotation of the
 /// box around its center.
 pub fn get_box_vertecies(
+    index_offset: u16,
     position: Vec3,
     size: Vec3,
     rotation: Vec3,
@@ -228,53 +229,53 @@ pub fn get_box_vertecies(
 
     let mut indices = Vec::new();
     // Front
-    indices.push(0);
-    indices.push(1);
-    indices.push(3);
-    indices.push(0);
-    indices.push(3);
-    indices.push(2);
+    indices.push(0 + index_offset);
+    indices.push(1 + index_offset);
+    indices.push(3 + index_offset);
+    indices.push(0 + index_offset);
+    indices.push(3 + index_offset);
+    indices.push(2 + index_offset);
 
     // Back
-    indices.push(7);
-    indices.push(5);
-    indices.push(4);
-    indices.push(7);
-    indices.push(4);
-    indices.push(6);
+    indices.push(7 + index_offset);
+    indices.push(5 + index_offset);
+    indices.push(4 + index_offset);
+    indices.push(7 + index_offset);
+    indices.push(4 + index_offset);
+    indices.push(6 + index_offset);
 
     // Left
-    indices.push(11);
-    indices.push(9);
-    indices.push(8);
+    indices.push(11 + index_offset);
+    indices.push(9 + index_offset);
+    indices.push(8 + index_offset);
 
-    indices.push(11);
-    indices.push(8);
-    indices.push(10);
+    indices.push(11 + index_offset);
+    indices.push(8 + index_offset);
+    indices.push(10 + index_offset);
 
     // Right
-    indices.push(12);
-    indices.push(13);
-    indices.push(15);
-    indices.push(12);
-    indices.push(15);
-    indices.push(14);
+    indices.push(12 + index_offset);
+    indices.push(13 + index_offset);
+    indices.push(15 + index_offset);
+    indices.push(12 + index_offset);
+    indices.push(15 + index_offset);
+    indices.push(14 + index_offset);
 
     // Top
-    indices.push(16);
-    indices.push(17);
-    indices.push(19);
-    indices.push(16);
-    indices.push(19);
-    indices.push(18);
+    indices.push(16 + index_offset);
+    indices.push(17 + index_offset);
+    indices.push(19 + index_offset);
+    indices.push(16 + index_offset);
+    indices.push(19 + index_offset);
+    indices.push(18 + index_offset);
 
     // Bottom
-    indices.push(23);
-    indices.push(21);
-    indices.push(20);
-    indices.push(23);
-    indices.push(20);
-    indices.push(22);
+    indices.push(23 + index_offset);
+    indices.push(21 + index_offset);
+    indices.push(20 + index_offset);
+    indices.push(23 + index_offset);
+    indices.push(20 + index_offset);
+    indices.push(22 + index_offset);
 
     (vertices, indices)
 }
