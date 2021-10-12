@@ -4,10 +4,6 @@ pub(crate) mod geometry {
     pub(crate) mod r#box;
 }
 pub(crate) mod light;
-pub(crate) mod math {
-    pub mod cartesian_to_spherical;
-    pub mod spherical_to_cartesian;
-}
 /// Holds all application logic that is visible from the outside.
 pub mod state;
 pub(crate) mod texture;

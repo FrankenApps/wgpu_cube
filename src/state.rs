@@ -7,7 +7,6 @@ use crate::{
     camera_controller::CameraController,
     geometry::r#box::get_box_vertecies,
     light::LightUniform,
-    math::spherical_to_cartesian::spherical_to_cartesian_coords,
     texture,
     vertex::Vertex,
 };
@@ -121,18 +120,14 @@ impl State {
         let depth_texture =
             texture::Texture::create_depth_texture(&device, &config, "depth_texture");
 
-        let eye_pos = spherical_to_cartesian_coords(Vec3::new(7.0, 1.5, 1.25));
-
-        let camera = Camera {
-            //eye: (0.0, 2.0, 2.0).into(),
-            eye: eye_pos.into(),
-            target: (0.0, 0.0, 0.0).into(),
-            up: Vec3::new(0.0, 1.0, 0.0),
-            aspect: config.width as f32 / config.height as f32,
-            fovy: 45.0,
-            znear: 0.1,
-            zfar: 100.0,
-        };
+        let camera = Camera::new(
+            2.0, 
+            1.5, 
+            1.25, 
+            Vec3::new(0.0, 0.0, 0.0), 
+            config.width as f32 / config.height as f32
+        );
+        
         let camera_controller = CameraController::new(0.1);
 
         let mut camera_uniform = CameraUniform::new();
