@@ -1,9 +1,9 @@
 use glam::Vec3;
 use wgpu::util::DeviceExt;
-use winit::{event::WindowEvent, window::Window};
+use winit::{event::{DeviceEvent}, window::Window};
 
 use crate::{
-    camera::{Camera, CameraUniform},
+    camera::{OrbitCamera, CameraUniform},
     camera_controller::CameraController,
     geometry::r#box::get_box_vertecies,
     light::LightUniform,
@@ -26,7 +26,7 @@ pub struct State {
     #[allow(dead_code)]
     diffuse_texture: texture::Texture,
     diffuse_bind_group: wgpu::BindGroup,
-    camera: Camera,
+    camera: OrbitCamera,
     camera_controller: CameraController,
     camera_uniform: CameraUniform,
     camera_buffer: wgpu::Buffer,
@@ -120,15 +120,16 @@ impl State {
         let depth_texture =
             texture::Texture::create_depth_texture(&device, &config, "depth_texture");
 
-        let camera = Camera::new(
+        let mut camera = OrbitCamera::new(
             2.0, 
             1.5, 
             1.25, 
             Vec3::new(0.0, 0.0, 0.0), 
             config.width as f32 / config.height as f32
         );
+        camera.bounds.min_distance = Some(1.1);
         
-        let camera_controller = CameraController::new(0.1);
+        let camera_controller = CameraController::new(0.05);
 
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera);
@@ -336,12 +337,12 @@ impl State {
         }
     }
 
-    pub fn input(&mut self, event: &WindowEvent, window: &Window) -> bool {
-        self.camera_controller.process_events(event, window)
+    pub fn input(&mut self, event: &DeviceEvent, window: &Window) {
+        self.camera_controller.process_events(event, window, &mut self.camera);
     }
 
     pub fn update(&mut self) {
-        self.camera_controller.update_camera(&mut self.camera);
+        //self.camera_controller.update_camera(&mut self.camera);
         self.camera_uniform.update_view_proj(&self.camera);
         self.queue.write_buffer(
             &self.camera_buffer,
@@ -405,7 +406,7 @@ impl State {
             render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
             render_pass.set_bind_group(2, &self.light_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
             render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
         }
 

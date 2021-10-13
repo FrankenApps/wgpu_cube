@@ -11,11 +11,11 @@ use crate::vertex::Vertex;
 /// * `rotation`: The `XYZ` - Euler angles which represent the rotation of the
 /// box around its center.
 pub fn get_box_vertecies(
-    index_offset: u16,
+    index_offset: u32,
     position: Vec3,
     size: Vec3,
     rotation: Vec3,
-) -> (Vec<Vertex>, Vec<u16>) {
+) -> (Vec<Vertex>, Vec<u32>) {
 
     // Calculate transformation
     let transform = Mat4::from_translation(position) *

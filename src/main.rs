@@ -9,11 +9,10 @@ pub mod state;
 pub(crate) mod texture;
 pub(crate) mod vertex;
 
-
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
-    window::{WindowBuilder},
+    window::WindowBuilder,
 };
 
 use crate::state::State;
@@ -41,29 +40,33 @@ fn main() {
                 ref event,
                 window_id,
             } if window_id == window.id() => {
-                if !state.input(event, &window) {
-                    match event {
-                        WindowEvent::CloseRequested
-                        | WindowEvent::KeyboardInput {
-                            input:
-                                KeyboardInput {
-                                    state: ElementState::Pressed,
-                                    virtual_keycode: Some(VirtualKeyCode::Escape),
-                                    ..
-                                },
-                            ..
-                        } => *control_flow = ControlFlow::Exit,
-                        WindowEvent::Resized(physical_size) => {
-                            state.resize(*physical_size);
-                        }
-                        WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                            // new_inner_size is &mut so w have to dereference it twice
-                            state.resize(**new_inner_size);
-                        }
-                        _ => {}
+                match event {
+                    WindowEvent::CloseRequested
+                    | WindowEvent::KeyboardInput {
+                        input:
+                            KeyboardInput {
+                                state: ElementState::Pressed,
+                                virtual_keycode: Some(VirtualKeyCode::Escape),
+                                ..
+                            },
+                        ..
+                    } => *control_flow = ControlFlow::Exit,
+                    WindowEvent::Resized(physical_size) => {
+                        state.resize(*physical_size);
                     }
+                    WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
+                        // new_inner_size is &mut so w have to dereference it twice
+                        state.resize(**new_inner_size);
+                    }
+                    _ => {}
                 }
             }
+            Event::DeviceEvent {
+                ref event,
+                ..
+            } => {
+                state.input(event, &window)
+            },
             Event::RedrawRequested(_) => {
                 state.update();
                 match state.render() {
@@ -77,7 +80,7 @@ fn main() {
                         eprintln!("{:?}", e);
                         // Request redraw to fix fix the issue.
                         window.request_redraw();
-                    },
+                    }
                 }
             }
             _ => {}
