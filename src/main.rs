@@ -1,21 +1,11 @@
-pub(crate) mod camera;
-pub(crate) mod camera_controller;
-pub(crate) mod geometry {
-    pub(crate) mod r#box;
-}
-pub(crate) mod light;
-/// Holds all application logic that is visible from the outside.
-pub mod state;
-pub(crate) mod texture;
-pub(crate) mod vertex;
-
+use glam::Vec3;
+use wgpu_shape_renderer::render::{camera::OrbitCamera, camera_controller::CameraController, state::State};
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
 
-use crate::state::State;
 
 fn main() {
     let before = std::time::Instant::now();
@@ -28,8 +18,21 @@ fn main() {
 
     println!("Window shown in {:.2?}.", before.elapsed());
 
+    let size = window.inner_size();
+
+    let mut camera = OrbitCamera::new(
+        2.0, 
+        1.5, 
+        1.25, 
+        Vec3::new(0.0, 0.0, 0.0), 
+        size.width as f32 / size.height as f32
+    );
+    camera.bounds.min_distance = Some(1.1);
+    
+    let camera_controller = CameraController::new(0.05);
+
     // State::new uses async code, so we're going to wait for it to finish
-    let mut state = pollster::block_on(State::new(&window));
+    let mut state = pollster::block_on(State::new(&window, camera, camera_controller));
 
     println!("Setup done in {:.2?}.", before.elapsed());
 

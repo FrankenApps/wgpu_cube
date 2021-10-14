@@ -1,7 +1,7 @@
 use glam::{Vec3};
 use winit::{dpi::PhysicalPosition, event::{DeviceEvent, ElementState, KeyboardInput, MouseScrollDelta, VirtualKeyCode}, window::Window};
 
-use crate::camera::OrbitCamera;
+use crate::render::camera::OrbitCamera;
 
 pub struct CameraController {
     pub speed: f32,
@@ -83,8 +83,8 @@ impl CameraController {
                 if self.is_drag_rotate {
                     camera.add_yaw(-delta.0 as f32 * self.speed);
                     camera.add_pitch(delta.1 as f32 * self.speed);
+                    window.request_redraw();
                 }
-                window.request_redraw();
             },
             _ => (),
         }

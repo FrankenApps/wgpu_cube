@@ -2,7 +2,7 @@ use glam::Vec3;
 use wgpu::util::DeviceExt;
 use winit::{event::{DeviceEvent}, window::Window};
 
-use crate::{
+use crate::render::{
     camera::{OrbitCamera, CameraUniform},
     camera_controller::CameraController,
     geometry::r#box::get_box_vertecies,
@@ -37,7 +37,7 @@ pub struct State {
 }
 
 impl State {
-    pub async fn new(window: &Window) -> Self {
+    pub async fn new(window: &Window, camera: OrbitCamera, camera_controller: CameraController) -> Self {
         let size = window.inner_size();
 
         // The instance is a handle to our GPU
@@ -119,17 +119,6 @@ impl State {
 
         let depth_texture =
             texture::Texture::create_depth_texture(&device, &config, "depth_texture");
-
-        let mut camera = OrbitCamera::new(
-            2.0, 
-            1.5, 
-            1.25, 
-            Vec3::new(0.0, 0.0, 0.0), 
-            config.width as f32 / config.height as f32
-        );
-        camera.bounds.min_distance = Some(1.1);
-        
-        let camera_controller = CameraController::new(0.05);
 
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera);
@@ -273,8 +262,8 @@ impl State {
         let mut indices = Vec::new();
         let mut indices_count: u32 = 0;
         for x in -5..5 {
-            for y in 0..15 {
-                for z in -8..8 {
+            for y in -8..8 {
+                for z in -5..5 {
                     let (mut vertices_temp, mut indices_temp) = get_box_vertecies(
                         indices_count,
                         Vec3::new(x as f32, y as f32, z as f32),
