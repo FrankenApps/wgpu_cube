@@ -48,6 +48,7 @@ impl State {
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
                 compatible_surface: Some(&surface),
+                force_fallback_adapter: false, // If possible do not use a software renderer.
             })
             .await
             .unwrap();
@@ -353,7 +354,7 @@ impl State {
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        let output = self.surface.get_current_frame()?.output;
+        let output = self.surface.get_current_texture()?;
         let view = output
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
@@ -400,6 +401,7 @@ impl State {
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
+        output.present();
 
         Ok(())
     }
