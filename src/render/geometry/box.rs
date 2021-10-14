@@ -1,6 +1,7 @@
 use glam::{Mat4, Quat, Vec3, Vec4, Vec4Swizzles};
 
-use crate::vertex::Vertex;
+use crate::render::vertex::Vertex;
+
 
 /// Calculates the vertecies of a box.
 /// 

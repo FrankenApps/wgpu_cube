@@ -1,7 +1,7 @@
 use glam::{Vec3};
 use winit::{dpi::PhysicalPosition, event::{DeviceEvent, ElementState, KeyboardInput, MouseScrollDelta, VirtualKeyCode}, window::Window};
 
-use crate::camera::OrbitCamera;
+use crate::render::camera::OrbitCamera;
 
 pub struct CameraController {
     pub speed: f32,
