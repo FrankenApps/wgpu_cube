@@ -271,10 +271,10 @@ impl State {
 
         /* let mut vertices = Vec::new();
         let mut indices = Vec::new();
-        let mut indices_count: u16 = 0;
+        let mut indices_count: u32 = 0;
         for x in -5..5 {
             for y in 0..15 {
-                for z in -5..5 {
+                for z in -8..8 {
                     let (mut vertices_temp, mut indices_temp) = get_box_vertecies(
                         indices_count,
                         Vec3::new(x as f32, y as f32, z as f32),
