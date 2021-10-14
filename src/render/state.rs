@@ -1,10 +1,9 @@
 use glam::Vec3;
 use wgpu::util::DeviceExt;
-use winit::{event::{DeviceEvent}, window::Window};
+use winit::window::Window;
 
 use crate::render::{
     camera::{OrbitCamera, CameraUniform},
-    camera_controller::CameraController,
     geometry::r#box::get_box_vertecies,
     light::LightUniform,
     texture,
@@ -26,8 +25,7 @@ pub struct State {
     #[allow(dead_code)]
     diffuse_texture: texture::Texture,
     diffuse_bind_group: wgpu::BindGroup,
-    camera: OrbitCamera,
-    camera_controller: CameraController,
+    pub camera: OrbitCamera,
     camera_uniform: CameraUniform,
     camera_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
@@ -37,7 +35,7 @@ pub struct State {
 }
 
 impl State {
-    pub async fn new(window: &Window, camera: OrbitCamera, camera_controller: CameraController) -> Self {
+    pub async fn new(window: &Window, camera: OrbitCamera) -> Self {
         let size = window.inner_size();
 
         // The instance is a handle to our GPU
@@ -304,7 +302,6 @@ impl State {
             diffuse_texture,
             diffuse_bind_group,
             camera,
-            camera_controller,
             camera_buffer,
             camera_bind_group,
             camera_uniform,
@@ -327,12 +324,7 @@ impl State {
         }
     }
 
-    pub fn input(&mut self, event: &DeviceEvent, window: &Window) {
-        self.camera_controller.process_events(event, window, &mut self.camera);
-    }
-
     pub fn update(&mut self) {
-        //self.camera_controller.update_camera(&mut self.camera);
         self.camera_uniform.update_view_proj(&self.camera);
         self.queue.write_buffer(
             &self.camera_buffer,

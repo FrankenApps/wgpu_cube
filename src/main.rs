@@ -1,5 +1,8 @@
+pub(crate) mod camera_controller;
+
+use camera_controller::CameraController;
 use glam::Vec3;
-use wgpu_shape_renderer::render::{camera::OrbitCamera, camera_controller::CameraController, state::State};
+use wgpu_shape_renderer::render::{camera::OrbitCamera, state::State};
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
@@ -8,7 +11,7 @@ use winit::{
 
 
 fn main() {
-    let before = std::time::Instant::now();
+    //let before = std::time::Instant::now();
     env_logger::init();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
@@ -16,7 +19,7 @@ fn main() {
         .build(&event_loop)
         .unwrap();
 
-    println!("Window shown in {:.2?}.", before.elapsed());
+    //println!("Window shown in {:.2?}.", before.elapsed());
 
     let size = window.inner_size();
 
@@ -29,12 +32,12 @@ fn main() {
     );
     camera.bounds.min_distance = Some(1.1);
     
-    let camera_controller = CameraController::new(0.05);
+    let mut camera_controller = CameraController::new(0.05);
 
     // State::new uses async code, so we're going to wait for it to finish
-    let mut state = pollster::block_on(State::new(&window, camera, camera_controller));
+    let mut state = pollster::block_on(State::new(&window, camera));
 
-    println!("Setup done in {:.2?}.", before.elapsed());
+    //println!("Setup done in {:.2?}.", before.elapsed());
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
@@ -68,7 +71,8 @@ fn main() {
                 ref event,
                 ..
             } => {
-                state.input(event, &window)
+                camera_controller.process_events(event, &window, &mut state.camera);
+                //state.input(event, &window)
             },
             Event::RedrawRequested(_) => {
                 state.update();

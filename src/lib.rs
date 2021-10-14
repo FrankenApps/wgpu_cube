@@ -1,6 +1,5 @@
 pub mod render {
     pub mod camera;
-    pub mod camera_controller;
     pub mod geometry {
         pub mod r#box;
     }
