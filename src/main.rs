@@ -35,7 +35,8 @@ fn main() {
     let mut camera_controller = CameraController::new(0.05);
 
     // State::new uses async code, so we're going to wait for it to finish
-    let mut state = pollster::block_on(State::new(&window, camera));
+    let mut state = pollster::block_on(
+        State::new(&window, (size.width, size.height), camera));
 
     //println!("Setup done in {:.2?}.", before.elapsed());
 
@@ -58,11 +59,13 @@ fn main() {
                         ..
                     } => *control_flow = ControlFlow::Exit,
                     WindowEvent::Resized(physical_size) => {
-                        state.resize(*physical_size);
+                        let size = (physical_size.width, physical_size.height);
+                        state.resize(size);
                     }
                     WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                         // new_inner_size is &mut so w have to dereference it twice
-                        state.resize(**new_inner_size);
+                        let size = (new_inner_size.width, new_inner_size.height);
+                        state.resize(size);
                     }
                     _ => {}
                 }

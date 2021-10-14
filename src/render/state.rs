@@ -1,9 +1,8 @@
 use glam::Vec3;
 use wgpu::util::DeviceExt;
-use winit::window::Window;
 
 use crate::render::{
-    camera::{OrbitCamera, CameraUniform},
+    camera::{CameraUniform, OrbitCamera},
     geometry::r#box::get_box_vertecies,
     light::LightUniform,
     texture,
@@ -16,7 +15,7 @@ pub struct State {
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
-    pub size: winit::dpi::PhysicalSize<u32>,
+    pub size: (u32, u32),
     render_pipeline: wgpu::RenderPipeline,
     depth_texture: texture::Texture,
     vertex_buffer: wgpu::Buffer,
@@ -35,9 +34,10 @@ pub struct State {
 }
 
 impl State {
-    pub async fn new(window: &Window, camera: OrbitCamera) -> Self {
-        let size = window.inner_size();
-
+    pub async fn new<W>(window: &W, size: (u32, u32), camera: OrbitCamera) -> Self
+    where
+        W: raw_window_handle::HasRawWindowHandle,
+    {
         // The instance is a handle to our GPU
         // BackendBit::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU
         let instance = wgpu::Instance::new(wgpu::Backends::all());
@@ -65,8 +65,8 @@ impl State {
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface.get_preferred_format(&adapter).unwrap(),
-            width: size.width,
-            height: size.height,
+            width: size.0,
+            height: size.1,
             present_mode: wgpu::PresentMode::Fifo,
         };
         surface.configure(&device, &config);
@@ -254,7 +254,7 @@ impl State {
             0,
             Vec3::new(0.0, 0.0, 0.0),
             Vec3::new(1.0, 1.0, 1.0),
-            Vec3::new(0.0, 0.0, 0.0)
+            Vec3::new(0.0, 0.0, 0.0),
         );
 
         /* let mut vertices = Vec::new();
@@ -311,11 +311,11 @@ impl State {
         }
     }
 
-    pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
-        if new_size.width > 0 && new_size.height > 0 {
+    pub fn resize(&mut self, new_size: (u32, u32)) {
+        if new_size.0 > 0 && new_size.1 > 0 {
             self.size = new_size;
-            self.config.width = new_size.width;
-            self.config.height = new_size.height;
+            self.config.width = new_size.0;
+            self.config.height = new_size.1;
             self.depth_texture =
                 texture::Texture::create_depth_texture(&self.device, &self.config, "depth_texture");
             self.surface.configure(&self.device, &self.config);

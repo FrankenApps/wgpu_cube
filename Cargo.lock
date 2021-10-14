@@ -512,6 +512,7 @@ dependencies = [
  "image",
  "log",
  "pollster",
+ "raw-window-handle",
  "wasm-bindgen",
  "web-sys",
  "wgpu",
