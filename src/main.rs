@@ -74,7 +74,6 @@ fn main() {
                 ..
             } => {
                 camera_controller.process_events(event, &window, &mut state.camera);
-                //state.input(event, &window)
             },
             Event::RedrawRequested(_) => {
                 state.update();

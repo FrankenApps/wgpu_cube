@@ -7,8 +7,6 @@ It is heavily based on the excellent [learn-wgpu](https://github.com/sotrh/learn
 You should be able to run the project on **Linux**, **MacOS** and **Windows** using `cargo run --release`.
 
 ## WebGL2
-The goal is to also compile this sample to wasm using WebGL, but this is does work correctly yet.
-
 In order to build for `wasm32-unknown-unknown`:
 1. Run `wasm-pack build --target web` ( you need a recent version of [`wasm-pack`](https://rustwasm.github.io/wasm-pack/))
 2. Serve the root directory that contains the `Cargo.toml` with a static web server (for example with [`live-server`](https://www.npmjs.com/package/live-server))

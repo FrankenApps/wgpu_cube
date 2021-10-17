@@ -10,6 +10,9 @@ pub mod render {
 }
 
 #[cfg(target_arch = "wasm32")]
+pub(crate) mod wasm_camera_controller;
+
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::{prelude::*, JsCast};
 #[cfg(target_arch = "wasm32")]
 use winit::{
@@ -18,6 +21,14 @@ use winit::{
     platform::web::WindowBuilderExtWebSys,
     window::WindowBuilder,
 };
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    /// Log a string value to the console.
+    fn log(s: &str);
+}
 
 /// The framework for calling **WebGL** from **WASM**.
 #[cfg(target_arch = "wasm32")]
@@ -70,6 +81,8 @@ impl WebGLRenderer {
         );
         camera.bounds.min_distance = Some(1.1);
 
+        let mut camera_controller = wasm_camera_controller::CameraController::new(0.05);
+
         // State::new uses async code, so we're going to wait for it to finish
         let mut state = pollster::block_on(render::state::State::new(
             &window,
@@ -106,7 +119,11 @@ impl WebGLRenderer {
                         _ => {}
                     }
                 }
-                Event::DeviceEvent { ref event, .. } => {},
+                Event::DeviceEvent { ref event, .. } => {
+                    // Somehow MouseMotion events are the only ones captured...
+                    //log(format!("Event: {:?}", event).as_str());
+                    camera_controller.process_events(event, &window, &mut state.camera);
+                },
                 Event::RedrawRequested(_) => {
                     state.update();
                     match state.render() {
