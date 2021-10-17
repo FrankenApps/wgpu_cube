@@ -8,14 +8,16 @@ resolver="2"
 [dependencies]
 anyhow = "1.0"
 bytemuck = { version = "1.4", features = [ "derive" ] }
-env_logger = "0.9"
 glam = { version = "0.19.0", features = ["bytemuck"] }
 image = "0.23"
-log = "0.4"
 pollster = "0.2"
 raw-window-handle = "0.3.3"
 wgpu = { version = "0.11", features = ["webgl"] }
 winit = { version = "0.25", features = ["web-sys"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+env_logger = "0.9"
+log = "0.4"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.7"

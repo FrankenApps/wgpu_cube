@@ -49,7 +49,9 @@ impl WebGLRenderer {
             .dyn_into::<web_sys::HtmlCanvasElement>()
             .expect("Failed to convert element to canvas.");
 
-        env_logger::init();
+        // env_logger does not work on wasm.
+        // env_logger::init();
+
         let event_loop = winit::event_loop::EventLoop::new();
         let window = WindowBuilder::new()
             .with_title("Effcient wgpu cube")
@@ -68,13 +70,11 @@ impl WebGLRenderer {
         );
         camera.bounds.min_distance = Some(1.1);
 
-        let camera_controller = render::camera_controller::CameraController::new(0.05);
-
         // State::new uses async code, so we're going to wait for it to finish
         let mut state = pollster::block_on(render::state::State::new(
             &window,
+            (size.width, size.height),
             camera,
-            camera_controller,
         ));
 
         event_loop.run(move |event, _, control_flow| {
@@ -96,16 +96,17 @@ impl WebGLRenderer {
                             ..
                         } => *control_flow = ControlFlow::Exit,
                         WindowEvent::Resized(physical_size) => {
-                            state.resize(*physical_size);
+                            let size = (physical_size.width, physical_size.height);
+                            state.resize(size);
                         }
                         WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                            // new_inner_size is &mut so w have to dereference it twice
-                            state.resize(**new_inner_size);
+                            let size = (new_inner_size.width, new_inner_size.height);
+                            state.resize(size);
                         }
                         _ => {}
                     }
                 }
-                Event::DeviceEvent { ref event, .. } => state.input(event, &window),
+                Event::DeviceEvent { ref event, .. } => {},
                 Event::RedrawRequested(_) => {
                     state.update();
                     match state.render() {

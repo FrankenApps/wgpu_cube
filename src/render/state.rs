@@ -55,7 +55,7 @@ impl State {
                 &wgpu::DeviceDescriptor {
                     label: None,
                     features: wgpu::Features::empty(),
-                    limits: wgpu::Limits::default(),
+                    limits: wgpu::Limits::downlevel_webgl2_defaults(),
                 },
                 None, // Trace path
             )

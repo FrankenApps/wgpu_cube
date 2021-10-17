@@ -63,7 +63,6 @@ fn main() {
                         state.resize(size);
                     }
                     WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                        // new_inner_size is &mut so w have to dereference it twice
                         let size = (new_inner_size.width, new_inner_size.height);
                         state.resize(size);
                     }
