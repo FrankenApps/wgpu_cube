@@ -24,9 +24,16 @@ jobs:
     - name: Create publish folder
       run: mkdir www
     - name: Copy wasm files
-      run: cp -a pkg/. www/pkg
+      run: mkdir www/pkg &&
+           cp pkg/README.md www/README.md &&
+           cp pkg/wgpu_shape_renderer_bg.wasm www/pkg/wgpu_shape_renderer_bg.wasm &&
+           cp pkg/wgpu_shape_renderer_bg.wasm.d.ts www/pkg/wgpu_shape_renderer_bg.wasm.d.ts &&
+           cp pkg/wgpu_shape_renderer.d.ts www/pkg/wgpu_shape_renderer.d.ts
+           cp pkg/wgpu_shape_renderer.js www/pkg/wgpu_shape_renderer.js
     - name: Copy HTML template
       run: cp index.html www/index.html
+    - name: See wasm files
+      run: cd www/pkg && ls -a
     - name: Deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v3
       with:
