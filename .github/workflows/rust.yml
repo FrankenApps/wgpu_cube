@@ -17,8 +17,10 @@ jobs:
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
     - name: Build
       run: wasm-pack build --target web
-    - name: Run tests
-      run: cargo test --verbose
+    - name: See build output
+      run: ls
+    - name: See wasm files
+      run: cd pkg && ls -a
     - name: Create publish folder
       run: mkdir www
     - name: Copy wasm files
