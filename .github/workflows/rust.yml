@@ -17,10 +17,6 @@ jobs:
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
     - name: Build
       run: wasm-pack build --target web
-    - name: See build output
-      run: ls
-    - name: See wasm files
-      run: cd pkg && ls -a
     - name: Create publish folder
       run: mkdir www
     - name: Create build output folder
@@ -33,8 +29,6 @@ jobs:
            cp pkg/wgpu_shape_renderer.js www/pkg/wgpu_shape_renderer.js
     - name: Copy HTML template
       run: cp index.html www/index.html
-    - name: See wasm files
-      run: cd www/pkg && ls -a
     - name: Deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v3
       with:
