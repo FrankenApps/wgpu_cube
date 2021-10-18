@@ -12,6 +12,8 @@ In order to build for `wasm32-unknown-unknown`:
 2. Serve the root directory that contains the `Cargo.toml` with a static web server (for example with [`live-server`](https://www.npmjs.com/package/live-server))
 3. Open `index.html` in your browser with WebGL2.0 support
 
+The latest build is live on [https://frankenapps.github.io/wgpu_cube/](https://frankenapps.github.io/wgpu_cube/).
+
 ## Controls
 #### Mouse
 * Rotate: Hold left mouse button and drag.
