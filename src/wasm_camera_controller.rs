@@ -68,7 +68,7 @@ impl CameraController {
                 }
             },
             DeviceEvent::Button{
-                button: 0, // The Left Mouse Button.
+                button: 1, // The Left Mouse Button.
                 state,
             } => {
                 let is_pressed = *state == ElementState::Pressed;

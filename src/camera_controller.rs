@@ -59,7 +59,13 @@ impl CameraController {
                 }
             },
             DeviceEvent::Button{
-                button: 0, // The Left Mouse Button.
+                #[cfg(target_os = "macos")]
+                button: 0, // The Left Mouse Button on macos.
+                // This seems like it is a winit bug?
+
+                #[cfg(not(target_os = "macos"))]
+                button: 1, // The Left Mouse Button on all other platforms.
+
                 state,
             } => {
                 let is_pressed = *state == ElementState::Pressed;
