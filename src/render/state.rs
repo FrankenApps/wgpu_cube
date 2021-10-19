@@ -10,12 +10,15 @@ use crate::render::{
 };
 
 /// The state holds all data about the rendering cycle and the objects that are drawn to the screen.
-pub struct State {
+pub struct State{
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
+
+    /// The size used by the wgpu renderer in pixels.
     pub size: (u32, u32),
+
     render_pipeline: wgpu::RenderPipeline,
     depth_texture: texture::Texture,
     vertex_buffer: wgpu::Buffer,
@@ -24,7 +27,10 @@ pub struct State {
     #[allow(dead_code)]
     diffuse_texture: texture::Texture,
     diffuse_bind_group: wgpu::BindGroup,
+
+    /// The camera used for rendering the scene.
     pub camera: OrbitCamera,
+
     camera_uniform: CameraUniform,
     camera_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
@@ -34,6 +40,15 @@ pub struct State {
 }
 
 impl State {
+    /// Create a new application [State].
+    /// 
+    /// Arguments:
+    /// 
+    /// * `window`: A struct that implements the trait [raw_window_handle::HasRawWindowHandle].
+    /// * `size`: A tuple of [u32] which represents the size of the renderer surface in the x and
+    /// y - direction in pixels.
+    /// * `camera`: For now this only accepts an [OrbitCamera]. However in the future [State] should
+    /// become generic and this should accept any struct that implements [super::camera::Camera].
     pub async fn new<W>(window: &W, size: (u32, u32), camera: OrbitCamera) -> Self
     where
         W: raw_window_handle::HasRawWindowHandle,
@@ -236,7 +251,7 @@ impl State {
                 conservative: false,
             },
             depth_stencil: Some(wgpu::DepthStencilState {
-                format: texture::Texture::DEPTH_FORMAT,
+                format: wgpu::TextureFormat::Depth32Float,
                 depth_write_enabled: true,
                 depth_compare: wgpu::CompareFunction::Less, // 1.
                 stencil: wgpu::StencilState::default(),     // 2.
@@ -310,6 +325,10 @@ impl State {
         }
     }
 
+    /// Resizes the renderer and adjusts the camera aspect.
+    /// 
+    /// Arguments:
+    /// * `new_size`: A tuple of [u32] with the new dimensions in pixels.
     pub fn resize(&mut self, new_size: (u32, u32)) {
         if new_size.0 > 0 && new_size.1 > 0 {
             self.size = new_size;
@@ -323,6 +342,7 @@ impl State {
         }
     }
 
+    /// Updates the state.
     pub fn update(&mut self) {
         self.camera_uniform.update_view_proj(&self.camera);
         self.queue.write_buffer(
@@ -345,6 +365,7 @@ impl State {
         );
     }
 
+    /// Renders the scene based on the [State].
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
         let view = output

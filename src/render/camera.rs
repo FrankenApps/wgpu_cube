@@ -5,7 +5,7 @@ pub use self::orbit_camera::OrbitCamera;
 pub use self::orbit_camera::OrbitCameraBounds;
 
 /// A camera is used for rendering specific parts of the scene.
-pub trait Camera {
+pub trait Camera: Sized {
     fn build_view_projection_matrix(&self) -> Mat4;
 }
 
