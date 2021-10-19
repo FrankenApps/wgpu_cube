@@ -30,7 +30,7 @@ struct VertexOutput {
 };
 
 [[stage(vertex)]]
-fn main(
+fn vs_main(
     model: VertexInput,
 ) -> VertexOutput {
     var out: VertexOutput;
@@ -50,22 +50,17 @@ var t_diffuse: texture_2d<f32>;
 var s_diffuse: sampler;
 
 [[stage(fragment)]]
-fn main(in: VertexOutput) -> [[location(0)]] vec4<f32> {
+fn fs_main(in: VertexOutput) -> [[location(0)]] vec4<f32> {
     let object_color: vec4<f32> = textureSample(t_diffuse, s_diffuse, in.tex_coords);
-
-    // Temporary fix for WebGL2 disco lighting
-    let wasm_light_color = vec3<f32>(1.0, 1.0, 1.0);
     
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
-    //let ambient_color = light.color.xyz * ambient_strength;
-    let ambient_color = wasm_light_color * ambient_strength;
+    let ambient_color = light.color.xyz * ambient_strength;
 
     let light_dir = normalize(light.position.xyz - in.world_position);
 
     let diffuse_strength = max(dot(in.world_normal, light_dir), 0.0);
-    //let diffuse_color = light.color.xyz * diffuse_strength;
-    let diffuse_color = wasm_light_color * diffuse_strength;
+    let diffuse_color = light.color.xyz * diffuse_strength;
 
     // This would be lighting modeled after the Phong model only.
     //let view_dir = normalize(camera.view_pos.xyz - in.world_position);
@@ -77,8 +72,7 @@ fn main(in: VertexOutput) -> [[location(0)]] vec4<f32> {
     let half_dir = normalize(view_dir + light_dir);
     let specular_strength = pow(max(dot(in.world_normal, half_dir), 0.0), 32.0);
 
-    //let specular_color = light.color.xyz * specular_strength;
-    let specular_color = wasm_light_color * specular_strength;
+    let specular_color = light.color.xyz * specular_strength;
 
     let result = (ambient_color + diffuse_color + specular_color) * object_color.xyz;
 
