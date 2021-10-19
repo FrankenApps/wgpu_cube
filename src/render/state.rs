@@ -153,10 +153,8 @@ impl State {
         });
 
         let light_uniform = LightUniform {
-            position: [2.0, 6.0, 4.0],
-            _padding: 0,
-            color: [1.0, 1.0, 1.0],
-            _padding2: 0
+            position: [2.0, 6.0, 4.0, 1.0],
+            color: [1.0, 1.0, 1.0, 1.0],
         };
 
         let light_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -338,6 +336,7 @@ impl State {
             self.camera_uniform.view_position[0],
             self.camera_uniform.view_position[1],
             self.camera_uniform.view_position[2],
+            1.0
         ];
         self.queue.write_buffer(
             &self.light_buffer,

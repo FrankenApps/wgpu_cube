@@ -1,4 +1,3 @@
-use glam::{Vec3};
 use winit::{dpi::PhysicalPosition, event::{DeviceEvent, ElementState, KeyboardInput, MouseScrollDelta, VirtualKeyCode}, window::Window};
 
 use wgpu_shape_renderer::render::camera::OrbitCamera;
@@ -94,14 +93,5 @@ impl CameraController {
             },
             _ => (),
         }
-        camera.eye = calculate_cartesian_eye_position(camera.pitch, camera.yaw, camera.distance);
     }
-}
-
-fn calculate_cartesian_eye_position(pitch: f32, yaw: f32, distance: f32) -> Vec3 {
-    Vec3::new(
-        distance * yaw.sin() * pitch.cos(),
-        distance * pitch.sin(),
-        distance * yaw.cos() * pitch.cos(),
-    )
 }
