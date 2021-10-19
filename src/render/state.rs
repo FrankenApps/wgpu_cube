@@ -119,7 +119,7 @@ impl State {
         let depth_texture =
             texture::Texture::create_depth_texture(&device, &config, "depth_texture");
 
-        let mut camera_uniform = CameraUniform::new();
+        let mut camera_uniform = CameraUniform::default();
         camera_uniform.update_view_proj(&camera);
 
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -336,7 +336,7 @@ impl State {
             self.camera_uniform.view_position[0],
             self.camera_uniform.view_position[1],
             self.camera_uniform.view_position[2],
-            1.0
+            1.0,
         ];
         self.queue.write_buffer(
             &self.light_buffer,

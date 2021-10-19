@@ -33,7 +33,7 @@ extern "C" {
 /// The framework for calling **WebGL** from **WASM**.
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
-pub struct WebGLRenderer { }
+pub struct WebGLRenderer {}
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
@@ -96,34 +96,32 @@ impl WebGLRenderer {
                 Event::WindowEvent {
                     ref event,
                     window_id,
-                } if window_id == window.id() => {
-                    match event {
-                        WindowEvent::CloseRequested
-                        | WindowEvent::KeyboardInput {
-                            input:
-                                KeyboardInput {
-                                    state: ElementState::Pressed,
-                                    virtual_keycode: Some(VirtualKeyCode::Escape),
-                                    ..
-                                },
-                            ..
-                        } => *control_flow = ControlFlow::Exit,
-                        WindowEvent::Resized(physical_size) => {
-                            let size = (physical_size.width, physical_size.height);
-                            state.resize(size);
-                        }
-                        WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                            let size = (new_inner_size.width, new_inner_size.height);
-                            state.resize(size);
-                        }
-                        _ => {}
+                } if window_id == window.id() => match event {
+                    WindowEvent::CloseRequested
+                    | WindowEvent::KeyboardInput {
+                        input:
+                            KeyboardInput {
+                                state: ElementState::Pressed,
+                                virtual_keycode: Some(VirtualKeyCode::Escape),
+                                ..
+                            },
+                        ..
+                    } => *control_flow = ControlFlow::Exit,
+                    WindowEvent::Resized(physical_size) => {
+                        let size = (physical_size.width, physical_size.height);
+                        state.resize(size);
                     }
-                }
+                    WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
+                        let size = (new_inner_size.width, new_inner_size.height);
+                        state.resize(size);
+                    }
+                    _ => {}
+                },
                 Event::DeviceEvent { ref event, .. } => {
                     // Somehow MouseMotion events are the only ones captured...
                     //log(format!("Event: {:?}", event).as_str());
                     camera_controller.process_events(event, &window, &mut state.camera);
-                },
+                }
                 Event::RedrawRequested(_) => {
                     state.update();
                     match state.render() {

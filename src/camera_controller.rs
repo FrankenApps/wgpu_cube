@@ -1,4 +1,8 @@
-use winit::{dpi::PhysicalPosition, event::{DeviceEvent, ElementState, KeyboardInput, MouseScrollDelta, VirtualKeyCode}, window::Window};
+use winit::{
+    dpi::PhysicalPosition,
+    event::{DeviceEvent, ElementState, KeyboardInput, MouseScrollDelta, VirtualKeyCode},
+    window::Window,
+};
 
 use wgpu_shape_renderer::render::camera::OrbitCamera;
 
@@ -15,17 +19,20 @@ impl CameraController {
         }
     }
 
-    pub fn process_events(&mut self, event: &DeviceEvent, window: &Window, camera: &mut OrbitCamera) {
+    pub fn process_events(
+        &mut self,
+        event: &DeviceEvent,
+        window: &Window,
+        camera: &mut OrbitCamera,
+    ) {
         match event {
             // Sadly on newer versions of macos only the window event keypress is fired, so this won't work on macos.
             // See https://github.com/rust-windowing/winit/issues/1470.
-            DeviceEvent::Key(
-                    KeyboardInput {
-                        state,
-                        virtual_keycode: Some(keycode),
-                        ..
-                    }
-            ) => {
+            DeviceEvent::Key(KeyboardInput {
+                state,
+                virtual_keycode: Some(keycode),
+                ..
+            }) => {
                 let is_pressed = *state == ElementState::Pressed;
                 if is_pressed {
                     match *keycode {
@@ -53,44 +60,40 @@ impl CameraController {
                             camera.add_yaw(-self.speed);
                             window.request_redraw();
                         }
-                        _ => ()
+                        _ => (),
                     }
                 }
-            },
-            DeviceEvent::Button{
+            }
+            DeviceEvent::Button {
                 #[cfg(target_os = "macos")]
-                button: 0, // The Left Mouse Button on macos.
+                    button: 0, // The Left Mouse Button on macos.
                 // This seems like it is a winit bug?
-
                 #[cfg(not(target_os = "macos"))]
-                button: 1, // The Left Mouse Button on all other platforms.
+                    button: 1, // The Left Mouse Button on all other platforms.
 
                 state,
             } => {
                 let is_pressed = *state == ElementState::Pressed;
                 self.is_drag_rotate = is_pressed;
-            },
+            }
             DeviceEvent::MouseWheel { delta, .. } => {
                 let scroll_amount = -match delta {
                     // A mouse line is about 1 px.
                     MouseScrollDelta::LineDelta(_, scroll) => scroll * 1.0,
-                    MouseScrollDelta::PixelDelta(PhysicalPosition {
-                        y: scroll,
-                        ..
-                    }) => *scroll as f32,
+                    MouseScrollDelta::PixelDelta(PhysicalPosition { y: scroll, .. }) => {
+                        *scroll as f32
+                    }
                 };
                 camera.add_distance(scroll_amount * self.speed);
                 window.request_redraw();
-            },
-            DeviceEvent::MouseMotion{
-                delta
-            } => {
+            }
+            DeviceEvent::MouseMotion { delta } => {
                 if self.is_drag_rotate {
                     camera.add_yaw(-delta.0 as f32 * self.speed);
                     camera.add_pitch(delta.1 as f32 * self.speed);
                     window.request_redraw();
                 }
-            },
+            }
             _ => (),
         }
     }

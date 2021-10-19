@@ -1,12 +1,8 @@
 use glam::Mat4;
 
-mod orbit_camera {
-    pub(crate) mod orbit_camera;
-    pub(crate) mod orbit_camera_bounds;
-}
-pub use self::orbit_camera::orbit_camera::OrbitCamera;
-pub use self::orbit_camera::orbit_camera_bounds::OrbitCameraBounds;
-
+mod orbit_camera;
+pub use self::orbit_camera::OrbitCamera;
+pub use self::orbit_camera::OrbitCameraBounds;
 
 /// A camera is used for rendering specific parts of the scene.
 pub trait Camera {
@@ -18,7 +14,7 @@ pub trait Camera {
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct CameraUniform {
     /// The eye position of the camera in homogenous coordinates.
-    /// 
+    ///
     /// Homogenous coordinates are used to fullfill the 16 byte alignment requirement.
     pub view_position: [f32; 4],
 
@@ -27,20 +23,22 @@ pub struct CameraUniform {
 }
 
 impl CameraUniform {
-    /// Creates a new [CameraUniform].
-    pub fn new() -> Self {
-        Self {
-            view_position: [0.0; 4],
-            view_proj: Mat4::IDENTITY.to_cols_array_2d(),
-        }
-    }
-
     /// Updates the view projection matrix of this [CameraUniform].
-    /// 
+    ///
     /// Arguments:
     /// * `camera`: The [OrbitCamera] from which the matrix will be computed.
     pub fn update_view_proj(&mut self, camera: &OrbitCamera) {
         self.view_position = [camera.eye.x, camera.eye.y, camera.eye.z, 1.0];
         self.view_proj = camera.build_view_projection_matrix().to_cols_array_2d();
+    }
+}
+
+impl Default for CameraUniform {
+    /// Creates a default [CameraUniform].
+    fn default() -> Self {
+        Self {
+            view_position: [0.0; 4],
+            view_proj: Mat4::IDENTITY.to_cols_array_2d(),
+        }
     }
 }

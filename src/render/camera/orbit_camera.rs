@@ -1,9 +1,8 @@
 use glam::{Mat4, Vec3};
 
 use crate::render::camera::Camera;
-use super::orbit_camera_bounds::OrbitCameraBounds;
 
-/// An [OrbitCamera] only permits rotation of the eye on a spherical shell around a target. 
+/// An [OrbitCamera] only permits rotation of the eye on a spherical shell around a target.
 pub struct OrbitCamera {
     /// The distance of the eye from the target.
     pub distance: f32,
@@ -49,21 +48,15 @@ impl Camera for OrbitCamera {
 
 impl OrbitCamera {
     /// Creates a new [OrbitCamera].
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `distance`: The distance of the eye to the `target`.
     /// * `pitch`: The pitch angle in radians.
     /// * `yaw`: The yaw angle in radians.
     /// * `target`: The point around which the camera rotates.
     /// * `aspect`: The aspect ratio of the camera.
-    pub fn new(
-        distance: f32,
-        pitch: f32,
-        yaw: f32,
-        target: Vec3,
-        aspect: f32
-    ) -> Self {
+    pub fn new(distance: f32, pitch: f32, yaw: f32, target: Vec3, aspect: f32) -> Self {
         let mut camera = Self {
             distance,
             pitch,
@@ -82,28 +75,31 @@ impl OrbitCamera {
     }
 
     /// Sets the distance of the [OrbitCamera] from the target.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `distance`: The euclidean distance between the cameras' eye and the target.
     pub fn set_distance(&mut self, distance: f32) {
-        self.distance = distance.clamp(self.bounds.min_distance.unwrap_or(f32::EPSILON), self.bounds.max_distance.unwrap_or(f32::MAX));
+        self.distance = distance.clamp(
+            self.bounds.min_distance.unwrap_or(f32::EPSILON),
+            self.bounds.max_distance.unwrap_or(f32::MAX),
+        );
         self.update();
     }
 
     /// Incrementally changes the distance of the [OrbitCamera] from the target.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// `delta`: The amount by which the distance will be changed.
     pub fn add_distance(&mut self, delta: f32) {
         self.set_distance(self.distance + delta);
     }
 
     /// Sets the pitch of the [OrbitCamera].
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `pitch`: The new pitch angle in radians.
     pub fn set_pitch(&mut self, pitch: f32) {
         self.pitch = pitch.clamp(self.bounds.min_pitch, self.bounds.max_pitch);
@@ -111,18 +107,18 @@ impl OrbitCamera {
     }
 
     /// Incrementally changes the pitch of the [OrbitCamera].
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// `delta`: The amount by which the pitch will be changed.
     pub fn add_pitch(&mut self, delta: f32) {
         self.set_pitch(self.pitch + delta);
     }
 
     /// Sets the yaw of the [OrbitCamera].
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `yaw`: The new yaw angle in radians.
     pub fn set_yaw(&mut self, yaw: f32) {
         let mut bounded_yaw = yaw;
@@ -137,9 +133,9 @@ impl OrbitCamera {
     }
 
     /// Incrementally changes the yaw of the [OrbitCamera].
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// `delta`: The amount by which the yaw will be changed.
     pub fn add_yaw(&mut self, delta: f32) {
         self.set_yaw(self.yaw + delta);
@@ -151,10 +147,49 @@ impl OrbitCamera {
     }
 }
 
-/// Calulcates the eye position in cartesian coordinates from the spherical coordinates.
-/// 
+/// The boundaries for how an [OrbitCamera] can be rotated.
+pub struct OrbitCameraBounds {
+    /// The minimum distance between the eye and the target.
+    /// This should not be negative. In order to ensure this the minimum distance
+    /// should never be smaller than [f32::EPSILON].
+    pub min_distance: Option<f32>,
+
+    /// If set it is not possible to move the camera further from the target
+    /// than the specified amount.
+    pub max_distance: Option<f32>,
+
+    /// The `min_pitch` can only be between `]-PI / 2, 0]` due to mathematical reasons.
+    pub min_pitch: f32,
+
+    /// The `min_pitch` can only be between `]0, PI / 2]` due to mathematical reasons.
+    pub max_pitch: f32,
+
+    /// If set the yaw angle will be constrained. The constrain should be in the
+    /// interval `[-PI, 0]`.
+    pub min_yaw: Option<f32>,
+
+    /// If set the yaw angle will be constrained. The constrain should be in the
+    /// interval `[0, PI]`.
+    pub max_yaw: Option<f32>,
+}
+
+impl Default for OrbitCameraBounds {
+    fn default() -> Self {
+        Self {
+            min_distance: None,
+            max_distance: None,
+            min_pitch: -std::f32::consts::PI / 2.0 + f32::EPSILON,
+            max_pitch: std::f32::consts::PI / 2.0 - f32::EPSILON,
+            min_yaw: None,
+            max_yaw: None,
+        }
+    }
+}
+
+/// Calulcates the eye position in cartesian coordinates from spherical coordinates.
+///
 /// Arguments:
-/// 
+///
 /// * `pitch`: The pitch angle in radians.
 /// * `yaw`: The yaw angle in radians.
 /// * `distance`: The euclidean distance to the target.
