@@ -1,4 +1,6 @@
 use glam::Vec3;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 use wgpu::util::DeviceExt;
 
 use crate::render::{
@@ -10,14 +12,18 @@ use crate::render::{
 };
 
 /// The state holds all data about the rendering cycle and the objects that are drawn to the screen.
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub struct State{
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
 
-    /// The size used by the wgpu renderer in pixels.
-    pub size: (u32, u32),
+    /// The width of the wgpu renderer in pixels.
+    pub width: u32,
+
+    /// The height of the wgpu renderer in pixels.
+    pub height: u32,
 
     render_pipeline: wgpu::RenderPipeline,
     depth_texture: texture::Texture,
@@ -45,11 +51,15 @@ impl State {
     /// Arguments:
     /// 
     /// * `window`: A struct that implements the trait [raw_window_handle::HasRawWindowHandle].
-    /// * `size`: A tuple of [u32] which represents the size of the renderer surface in the x and
-    /// y - direction in pixels.
+    /// * `width`: The width of the wgpu renderer in pixels.
+    /// * `height`: The height of the wgpu renderer in pixels.
     /// * `camera`: For now this only accepts an [OrbitCamera]. However in the future [State] should
     /// become generic and this should accept any struct that implements [super::camera::Camera].
-    pub async fn new<W>(window: &W, size: (u32, u32), camera: OrbitCamera) -> Self
+    pub async fn new<W>(
+        window: &W,
+        width: u32, 
+        height: u32, 
+        camera: OrbitCamera) -> Self
     where
         W: raw_window_handle::HasRawWindowHandle,
     {
@@ -80,8 +90,8 @@ impl State {
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface.get_preferred_format(&adapter).unwrap(),
-            width: size.0,
-            height: size.1,
+            width: width,
+            height: height,
             present_mode: wgpu::PresentMode::Fifo,
         };
         surface.configure(&device, &config);
@@ -307,7 +317,8 @@ impl State {
             device,
             queue,
             config,
-            size,
+            width,
+            height,
             render_pipeline,
             depth_texture,
             vertex_buffer,
@@ -328,12 +339,14 @@ impl State {
     /// Resizes the renderer and adjusts the camera aspect.
     /// 
     /// Arguments:
-    /// * `new_size`: A tuple of [u32] with the new dimensions in pixels.
-    pub fn resize(&mut self, new_size: (u32, u32)) {
-        if new_size.0 > 0 && new_size.1 > 0 {
-            self.size = new_size;
-            self.config.width = new_size.0;
-            self.config.height = new_size.1;
+    /// * `new_width`: The new width of the renderer in pixels.
+    /// * `new_height`: The new height of the renderer in pixels.
+    pub fn resize(&mut self, new_width: u32, new_height: u32) {
+        if new_width > 0 && new_height > 0 {
+            self.width = new_width;
+            self.height = new_height;
+            self.config.width = new_width;
+            self.config.height = new_height;
             self.depth_texture =
                 texture::Texture::create_depth_texture(&self.device, &self.config, "depth_texture");
             self.surface.configure(&self.device, &self.config);

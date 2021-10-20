@@ -5,17 +5,72 @@
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
 </head>
 
+<style>
+    html {
+        height: 100%;
+    }
+</style>
+
 <body style="background-color: white; margin: 0; overflow: hidden; width: 100%; height: 100%;">
-    <canvas id="wgpu_shape_renderer_canvas" style="width: 100%; height: 100%; display: block; margin: 0px;"></canvas>
+    <canvas id="wgc_1" style="width: 100%; height: 100%; display: block; margin: 0px;"></canvas>
 
     <script type="module">
         import init, { WebGLRenderer } from './pkg/wgpu_shape_renderer.js';
 
-        async function run() {
+        let isDragRotate = false;
+        const mouse_speed = 0.025;
 
+        async function run() {
             await init();
 
-            new WebGLRenderer('wgpu_shape_renderer_canvas');
+            const canvas = document.querySelector("#wgc_1");
+            let width = canvas.clientWidth;
+            let height = canvas.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            let state = new WebGLRenderer('wgc_1', width, height);
+            state.update();
+            state.render();
+
+            // Append our event listeners.
+            canvas.addEventListener('mousedown', e => {
+                isDragRotate = true;
+            });
+
+            canvas.addEventListener('mousemove', e => {
+                if (isDragRotate === true) {
+                    state.add_yaw(-e.movementX * mouse_speed);
+                    state.add_pitch(e.movementY * mouse_speed);
+                    state.update();
+                    state.render();
+                }
+            });
+
+            canvas.addEventListener('mouseup', e => {
+                if (isDragRotate === true) {
+                    isDragRotate = false;
+                }
+            });
+
+            canvas.addEventListener('wheel', e => {
+                e.preventDefault();
+
+                state.add_distance(e.deltaY * mouse_speed);
+                state.update();
+                state.render();
+            });
+
+            window.addEventListener('resize', () => {
+                width = canvas.clientWidth;
+                height = canvas.clientHeight;
+                canvas.width = width;
+                canvas.height = height;
+                // Somehow this makes the WASM backend fail silently.
+                state.resize(width, height);
+                state.update();
+                state.render();
+            });
         }
 
         run();

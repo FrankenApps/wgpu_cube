@@ -1,8 +1,12 @@
 use glam::{Mat4, Vec3};
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 
-use crate::render::camera::Camera;
+use crate::{extras::math::vector3::Vector3, render::camera::Camera};
 
 /// An [OrbitCamera] only permits rotation of the eye on a spherical shell around a target.
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[derive(Debug, Clone, Copy)]
 pub struct OrbitCamera {
     /// The distance of the eye from the target.
     pub distance: f32,
@@ -14,13 +18,13 @@ pub struct OrbitCamera {
     pub yaw: f32,
 
     /// The eye of the camera in cartesian coordinates.
-    pub(crate) eye: Vec3,
+    pub(crate) eye: Vector3,
 
     /// The target of the orbit camera.
-    pub target: Vec3,
+    pub target: Vector3,
 
     /// The cameras' up vector.
-    pub up: Vec3,
+    pub up: Vector3,
 
     /// The bounds within which the camera can be moved.
     pub bounds: OrbitCameraBounds,
@@ -40,7 +44,7 @@ pub struct OrbitCamera {
 
 impl Camera for OrbitCamera {
     fn build_view_projection_matrix(&self) -> Mat4 {
-        let view = Mat4::look_at_rh(self.eye, self.target, self.up);
+        let view = Mat4::look_at_rh(self.eye.to_vec3(), self.target.to_vec3(), self.up.to_vec3());
         let proj = Mat4::perspective_rh(self.fovy, self.aspect, self.znear, self.zfar);
         proj * view
     }
@@ -61,9 +65,9 @@ impl OrbitCamera {
             distance,
             pitch,
             yaw,
-            eye: Vec3::ZERO, // Will be auto-calculted in `update()` nevertheless.
-            target,
-            up: Vec3::Y,
+            eye: Vector3::from_vec3(Vec3::ZERO), // Will be auto-calculted in `update()` nevertheless.
+            target: Vector3::from_vec3(target),
+            up: Vector3::from_vec3(Vec3::Y),
             bounds: OrbitCameraBounds::default(),
             aspect,
             fovy: std::f32::consts::PI / 2.0,
@@ -143,11 +147,13 @@ impl OrbitCamera {
 
     /// Updates the camera after changing `distance`, `pitch` or `yaw`.
     fn update(&mut self) {
-        self.eye = calculate_cartesian_eye_position(self.pitch, self.yaw, self.distance);
+        self.eye = Vector3::from_vec3(calculate_cartesian_eye_position(self.pitch, self.yaw, self.distance));
     }
 }
 
 /// The boundaries for how an [OrbitCamera] can be rotated.
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[derive(Debug, Clone, Copy)]
 pub struct OrbitCameraBounds {
     /// The minimum distance between the eye and the target.
     /// This should not be negative. In order to ensure this the minimum distance

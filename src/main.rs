@@ -34,7 +34,7 @@ fn main() {
     let mut camera_controller = CameraController::new(0.05);
 
     // State::new uses async code, so we're going to wait for it to finish
-    let mut state = pollster::block_on(State::new(&window, (size.width, size.height), camera));
+    let mut state = pollster::block_on(State::new(&window, size.width, size.height, camera));
 
     //println!("Setup done in {:.2?}.", before.elapsed());
 
@@ -56,12 +56,10 @@ fn main() {
                     ..
                 } => *control_flow = ControlFlow::Exit,
                 WindowEvent::Resized(physical_size) => {
-                    let size = (physical_size.width, physical_size.height);
-                    state.resize(size);
+                    state.resize(physical_size.width, physical_size.height);
                 }
                 WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                    let size = (new_inner_size.width, new_inner_size.height);
-                    state.resize(size);
+                    state.resize(new_inner_size.width, new_inner_size.height);
                 }
                 _ => {}
             },
@@ -73,7 +71,7 @@ fn main() {
                 match state.render() {
                     Ok(_) => {}
                     // Reconfigure the surface if lost
-                    Err(wgpu::SurfaceError::Lost) => state.resize(state.size),
+                    Err(wgpu::SurfaceError::Lost) => state.resize(state.width, state.height),
                     // The system is out of memory, we should probably quit
                     Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
                     // All other errors (Outdated, Timeout) should be resolved by the next frame
