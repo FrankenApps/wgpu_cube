@@ -35,9 +35,6 @@
             canvas.height = height;
 
             let state = new WebGLRenderer('wgc_1', width, height);
-
-            console.log("Renderer created.");
-
             state.update();
             state.render();
 
@@ -93,7 +90,7 @@
                     if (hypo === undefined) {
                         hypo = hypo1;
                     }
-                    state.add_distance(hypo1 / hypo);
+                    state.add_distance(-(hypo1 - hypo) * mouse_speed);
                     state.update();
                     state.render();
                 }

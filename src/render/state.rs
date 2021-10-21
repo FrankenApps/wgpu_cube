@@ -28,6 +28,7 @@ pub struct State{
     render_pipeline: wgpu::RenderPipeline,
     depth_texture: texture::Texture,
     vertex_buffer: wgpu::Buffer,
+    #[allow(dead_code)] // Ideally we will switch to indexed meshes once supported everywhere.
     index_buffer: wgpu::Buffer,
     num_indices: u32,
     #[allow(dead_code)]
@@ -305,11 +306,14 @@ impl State {
             contents: bytemuck::cast_slice(&vertices),
             usage: wgpu::BufferUsages::VERTEX,
         });
+        #[cfg(not(feature = "indexed"))]
+        let num_indices = vertices.len() as u32;
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index Buffer"),
             contents: bytemuck::cast_slice(&indices),
             usage: wgpu::BufferUsages::INDEX,
         });
+        #[cfg(feature = "indexed")]
         let num_indices = indices.len() as u32;
 
         Self {
@@ -422,8 +426,12 @@ impl State {
             render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
             render_pass.set_bind_group(2, &self.light_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+            #[cfg(feature = "indexed")]
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
+            #[cfg(feature = "indexed")]
             render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
+            #[cfg(not(feature = "indexed"))]
+            render_pass.draw(0..self.num_indices, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));

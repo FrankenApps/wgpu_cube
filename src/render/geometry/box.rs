@@ -10,6 +10,7 @@ use crate::render::vertex::Vertex;
 /// * `size`: The outer dimensions of the box.
 /// * `rotation`: The `XYZ` - Euler angles which represent the rotation of the
 /// box around its center.
+#[cfg(feature = "indexed")]
 pub fn get_box_vertecies(
     index_offset: u32,
     position: Vec3,
@@ -280,6 +281,339 @@ pub fn get_box_vertecies(
         20 + index_offset,
         22 + index_offset,
     ];
+
+    (vertices, indices)
+}
+
+/// Calculates the vertecies of a box.
+///
+/// Arguments:
+///
+/// * `position`: The position of the center of the box.
+/// * `size`: The outer dimensions of the box.
+/// * `rotation`: The `XYZ` - Euler angles which represent the rotation of the
+/// box around its center.
+#[cfg(not(feature = "indexed"))]
+pub fn get_box_vertecies(
+    _index_offset: u32,
+    position: Vec3,
+    size: Vec3,
+    rotation: Vec3,
+) -> (Vec<Vertex>, Vec<u32>) {
+    // Calculate transformation
+    let transform = Mat4::from_translation(position)
+        * Mat4::from_quat(Quat::from_euler(
+            glam::EulerRot::XYZ,
+            rotation.x,
+            rotation.y,
+            rotation.z,
+        ))
+        * Mat4::from_scale(size);
+
+    // Vertecies for a box
+    let points = vec![
+        transform * Vec4::new(-0.5f32, -0.5f32, 0.5f32, 1.0f32),
+        transform * Vec4::new(-0.5f32, 0.5f32, 0.5f32, 1.0f32),
+        transform * Vec4::new(0.5f32, -0.5f32, 0.5f32, 1.0f32),
+        transform * Vec4::new(0.5f32, 0.5f32, 0.5f32, 1.0f32),
+        transform * Vec4::new(-0.5f32, -0.5f32, -0.5f32, 1.0f32),
+        transform * Vec4::new(-0.5f32, 0.5f32, -0.5f32, 1.0f32),
+        transform * Vec4::new(0.5f32, -0.5f32, -0.5f32, 1.0f32),
+        transform * Vec4::new(0.5f32, 0.5f32, -0.5f32, 1.0f32),
+    ];
+
+    // Calulate normal vectors
+    let front = (points[1].xyz() - points[2].xyz())
+        .cross(points[0].xyz() - points[2].xyz())
+        .normalize();
+    let back = (points[6].xyz() - points[5].xyz())
+        .cross(points[4].xyz() - points[5].xyz())
+        .normalize();
+    let left = (points[1].xyz() - points[0].xyz())
+        .cross(points[4].xyz() - points[0].xyz())
+        .normalize();
+    let right = (points[6].xyz() - points[2].xyz())
+        .cross(points[3].xyz() - points[2].xyz())
+        .normalize();
+    let top = (points[7].xyz() - points[3].xyz())
+        .cross(points[1].xyz() - points[3].xyz())
+        .normalize();
+    let bottom = (points[0].xyz() - points[2].xyz())
+        .cross(points[6].xyz() - points[2].xyz())
+        .normalize();
+
+    // Tangents and bittangents will be calculated later.
+    let vertices = vec![
+        // Front
+        Vertex {
+            position: points[0].xyz().to_array(),
+            tex_coords: [0.0, 1.0],
+            normal: front.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[2].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: front.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[3].xyz().to_array(),
+            tex_coords: [1.0, 0.0],
+            normal: front.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+
+        Vertex {
+            position: points[0].xyz().to_array(),
+            tex_coords: [0.0, 1.0],
+            normal: front.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[3].xyz().to_array(),
+            tex_coords: [1.0, 0.0],
+            normal: front.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[1].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: front.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        // Back
+        Vertex {
+            position: points[7].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: back.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[6].xyz().to_array(),
+            tex_coords: [0.0, 1.0],
+            normal: back.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[4].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: back.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+
+        Vertex {
+            position: points[7].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: back.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[4].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: back.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[5].xyz().to_array(),
+            tex_coords: [1.0, 0.0],
+            normal: back.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        // Left
+        Vertex {
+            position: points[1].xyz().to_array(),
+            tex_coords: [1.0, 0.0],
+            normal: left.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[5].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: left.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[4].xyz().to_array(),
+            tex_coords: [0.0, 1.0],
+            normal: left.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+
+        Vertex {
+            position: points[1].xyz().to_array(),
+            tex_coords: [1.0, 0.0],
+            normal: left.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[4].xyz().to_array(),
+            tex_coords: [0.0, 1.0],
+            normal: left.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[0].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: left.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+
+        // Right
+        Vertex {
+            position: points[6].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: right.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[7].xyz().to_array(),
+            tex_coords: [1.0, 0.0],
+            normal: right.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[3].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: right.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+
+        Vertex {
+            position: points[6].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: right.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[3].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: right.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[2].xyz().to_array(),
+            tex_coords: [0.0, 1.0],
+            normal: right.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+
+        // Top
+        Vertex {
+            position: points[5].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: top.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[1].xyz().to_array(),
+            tex_coords: [0.0, 1.0],
+            normal: top.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[3].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: top.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+
+        Vertex {
+            position: points[5].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: top.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[3].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: top.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[7].xyz().to_array(),
+            tex_coords: [1.0, 0.0],
+            normal: top.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        // Bottom
+        Vertex {
+            position: points[2].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: bottom.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[0].xyz().to_array(),
+            tex_coords: [1.0, 0.0],
+            normal: bottom.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[4].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: bottom.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        
+        Vertex {
+            position: points[2].xyz().to_array(),
+            tex_coords: [1.0, 1.0],
+            normal: bottom.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[4].xyz().to_array(),
+            tex_coords: [0.0, 0.0],
+            normal: bottom.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+        Vertex {
+            position: points[6].xyz().to_array(),
+            tex_coords: [0.0, 1.0],
+            normal: bottom.to_array(),
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+        },
+
+    ];
+
+    let indices = vec![];
 
     (vertices, indices)
 }
