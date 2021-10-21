@@ -21,6 +21,10 @@
         let isDragRotate = false;
         const mouse_speed = 0.025;
 
+        let hypo = undefined;
+        let touchstartX = undefined;
+        let touchstartY = undefined;
+
         async function run() {
             await init();
 
@@ -31,6 +35,9 @@
             canvas.height = height;
 
             let state = new WebGLRenderer('wgc_1', width, height);
+
+            console.log("Renderer created.");
+
             state.update();
             state.render();
 
@@ -60,6 +67,40 @@
                 state.add_distance(e.deltaY * mouse_speed);
                 state.update();
                 state.render();
+            });
+
+            canvas.addEventListener('touchstart', e => {
+                if (e.touches.length === 1) {
+                    touchstartX = e.touches[0].pageX;
+                    touchstartY = e.touches[0].pageY;
+                }
+            });
+
+            canvas.addEventListener('touchmove', e => {
+                e.preventDefault();
+                if (e.touches.length === 1) {
+                    state.add_yaw(-(e.touches[0].pageX - touchstartX) * mouse_speed);
+                    state.add_pitch((e.touches[0].pageY - touchstartY) * mouse_speed);
+                    state.update();
+                    state.render();
+
+                    touchstartX = e.touches[0].pageX;
+                    touchstartY = e.touches[0].pageY;
+                }
+                else if (e.touches.length === 2) {
+                    let hypo1 = Math.hypot((e.touches[0].pageX - e.touches[1].pageX),
+                        (e.touches[0].pageY - e.touches[1].pageY));
+                    if (hypo === undefined) {
+                        hypo = hypo1;
+                    }
+                    state.add_distance(hypo1 / hypo);
+                    state.update();
+                    state.render();
+                }
+            });
+
+            canvas.addEventListener('touchend', () => {
+                hypo = undefined;
             });
 
             /* window.addEventListener('resize', () => {
