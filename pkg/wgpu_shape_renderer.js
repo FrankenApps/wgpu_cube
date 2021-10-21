@@ -9,15 +9,6 @@ function getObject(idx) { return heap[idx]; }
 
 let heap_next = heap.length;
 
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
-}
-
 function dropObject(idx) {
     if (idx < 36) return;
     heap[idx] = heap_next;
@@ -28,6 +19,15 @@ function takeObject(idx) {
     const ret = getObject(idx);
     dropObject(idx);
     return ret;
+}
+
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
 }
 
 let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
@@ -186,64 +186,11 @@ function debugString(val) {
     return className;
 }
 
-function makeMutClosure(arg0, arg1, dtor, f) {
-    const state = { a: arg0, b: arg1, cnt: 1, dtor };
-    const real = (...args) => {
-        // First up with a closure we increment the internal reference
-        // count. This ensures that the Rust closure environment won't
-        // be deallocated while we're invoking it.
-        state.cnt++;
-        const a = state.a;
-        state.a = 0;
-        try {
-            return f(a, state.b, ...args);
-        } finally {
-            if (--state.cnt === 0) {
-                wasm.__wbindgen_export_2.get(state.dtor)(a, state.b);
-
-            } else {
-                state.a = a;
-            }
-        }
-    };
-    real.original = state;
-
-    return real;
-}
-function __wbg_adapter_26(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h08651bcb6c81b8cf(arg0, arg1, addHeapObject(arg2));
-}
-
-function __wbg_adapter_29(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h08651bcb6c81b8cf(arg0, arg1, addHeapObject(arg2));
-}
-
-function __wbg_adapter_32(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h08651bcb6c81b8cf(arg0, arg1, addHeapObject(arg2));
-}
-
-function __wbg_adapter_35(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h08651bcb6c81b8cf(arg0, arg1, addHeapObject(arg2));
-}
-
-function __wbg_adapter_38(arg0, arg1) {
-    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__he7fc69cd297851d1(arg0, arg1);
-}
-
-function __wbg_adapter_41(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h08651bcb6c81b8cf(arg0, arg1, addHeapObject(arg2));
-}
-
-function __wbg_adapter_44(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h08651bcb6c81b8cf(arg0, arg1, addHeapObject(arg2));
-}
-
-function __wbg_adapter_47(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h08651bcb6c81b8cf(arg0, arg1, addHeapObject(arg2));
-}
-
-function __wbg_adapter_50(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h08651bcb6c81b8cf(arg0, arg1, addHeapObject(arg2));
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
 }
 
 let cachegetFloat32Memory0 = null;
@@ -286,9 +233,457 @@ function getArrayU8FromWasm0(ptr, len) {
     return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
 }
 /**
-* The framework for calling **WebGL** from **WASM**.
+* An [OrbitCamera] only permits rotation of the eye on a spherical shell around a target.
+*/
+export class OrbitCamera {
+
+    static __wrap(ptr) {
+        const obj = Object.create(OrbitCamera.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_orbitcamera_free(ptr);
+    }
+    /**
+    * The distance of the eye from the target.
+    */
+    get distance() {
+        var ret = wasm.__wbg_get_orbitcamera_distance(this.ptr);
+        return ret;
+    }
+    /**
+    * The distance of the eye from the target.
+    * @param {number} arg0
+    */
+    set distance(arg0) {
+        wasm.__wbg_set_orbitcamera_distance(this.ptr, arg0);
+    }
+    /**
+    * The pitch angle in radians.
+    */
+    get pitch() {
+        var ret = wasm.__wbg_get_orbitcamera_pitch(this.ptr);
+        return ret;
+    }
+    /**
+    * The pitch angle in radians.
+    * @param {number} arg0
+    */
+    set pitch(arg0) {
+        wasm.__wbg_set_orbitcamera_pitch(this.ptr, arg0);
+    }
+    /**
+    * The yaw angle in radians.
+    */
+    get yaw() {
+        var ret = wasm.__wbg_get_orbitcamera_yaw(this.ptr);
+        return ret;
+    }
+    /**
+    * The yaw angle in radians.
+    * @param {number} arg0
+    */
+    set yaw(arg0) {
+        wasm.__wbg_set_orbitcamera_yaw(this.ptr, arg0);
+    }
+    /**
+    * The target of the orbit camera.
+    */
+    get target() {
+        var ret = wasm.__wbg_get_orbitcamera_target(this.ptr);
+        return Vector3.__wrap(ret);
+    }
+    /**
+    * The target of the orbit camera.
+    * @param {Vector3} arg0
+    */
+    set target(arg0) {
+        _assertClass(arg0, Vector3);
+        var ptr0 = arg0.ptr;
+        arg0.ptr = 0;
+        wasm.__wbg_set_orbitcamera_target(this.ptr, ptr0);
+    }
+    /**
+    * The cameras' up vector.
+    */
+    get up() {
+        var ret = wasm.__wbg_get_orbitcamera_up(this.ptr);
+        return Vector3.__wrap(ret);
+    }
+    /**
+    * The cameras' up vector.
+    * @param {Vector3} arg0
+    */
+    set up(arg0) {
+        _assertClass(arg0, Vector3);
+        var ptr0 = arg0.ptr;
+        arg0.ptr = 0;
+        wasm.__wbg_set_orbitcamera_up(this.ptr, ptr0);
+    }
+    /**
+    * The bounds within which the camera can be moved.
+    */
+    get bounds() {
+        var ret = wasm.__wbg_get_orbitcamera_bounds(this.ptr);
+        return OrbitCameraBounds.__wrap(ret);
+    }
+    /**
+    * The bounds within which the camera can be moved.
+    * @param {OrbitCameraBounds} arg0
+    */
+    set bounds(arg0) {
+        _assertClass(arg0, OrbitCameraBounds);
+        var ptr0 = arg0.ptr;
+        arg0.ptr = 0;
+        wasm.__wbg_set_orbitcamera_bounds(this.ptr, ptr0);
+    }
+    /**
+    * The aspect ratio of the camera.
+    */
+    get aspect() {
+        var ret = wasm.__wbg_get_orbitcamera_aspect(this.ptr);
+        return ret;
+    }
+    /**
+    * The aspect ratio of the camera.
+    * @param {number} arg0
+    */
+    set aspect(arg0) {
+        wasm.__wbg_set_orbitcamera_aspect(this.ptr, arg0);
+    }
+    /**
+    * The field of view of the camera.
+    */
+    get fovy() {
+        var ret = wasm.__wbg_get_orbitcamera_fovy(this.ptr);
+        return ret;
+    }
+    /**
+    * The field of view of the camera.
+    * @param {number} arg0
+    */
+    set fovy(arg0) {
+        wasm.__wbg_set_orbitcamera_fovy(this.ptr, arg0);
+    }
+    /**
+    * The near clipping plane of the camera.
+    */
+    get znear() {
+        var ret = wasm.__wbg_get_orbitcamera_znear(this.ptr);
+        return ret;
+    }
+    /**
+    * The near clipping plane of the camera.
+    * @param {number} arg0
+    */
+    set znear(arg0) {
+        wasm.__wbg_set_orbitcamera_znear(this.ptr, arg0);
+    }
+    /**
+    * The far clipping plane of the camera.
+    */
+    get zfar() {
+        var ret = wasm.__wbg_get_orbitcamera_zfar(this.ptr);
+        return ret;
+    }
+    /**
+    * The far clipping plane of the camera.
+    * @param {number} arg0
+    */
+    set zfar(arg0) {
+        wasm.__wbg_set_orbitcamera_zfar(this.ptr, arg0);
+    }
+}
+/**
+* The boundaries for how an [OrbitCamera] can be rotated.
+*/
+export class OrbitCameraBounds {
+
+    static __wrap(ptr) {
+        const obj = Object.create(OrbitCameraBounds.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_orbitcamerabounds_free(ptr);
+    }
+    /**
+    * The minimum distance between the eye and the target.
+    * This should not be negative. In order to ensure this the minimum distance
+    * should never be smaller than [f32::EPSILON].
+    */
+    get min_distance() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.__wbg_get_orbitcamerabounds_min_distance(retptr, this.ptr);
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getFloat32Memory0()[retptr / 4 + 1];
+            return r0 === 0 ? undefined : r1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+    * The minimum distance between the eye and the target.
+    * This should not be negative. In order to ensure this the minimum distance
+    * should never be smaller than [f32::EPSILON].
+    * @param {number | undefined} arg0
+    */
+    set min_distance(arg0) {
+        wasm.__wbg_set_orbitcamerabounds_min_distance(this.ptr, !isLikeNone(arg0), isLikeNone(arg0) ? 0 : arg0);
+    }
+    /**
+    * If set it is not possible to move the camera further from the target
+    * than the specified amount.
+    */
+    get max_distance() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.__wbg_get_orbitcamerabounds_max_distance(retptr, this.ptr);
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getFloat32Memory0()[retptr / 4 + 1];
+            return r0 === 0 ? undefined : r1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+    * If set it is not possible to move the camera further from the target
+    * than the specified amount.
+    * @param {number | undefined} arg0
+    */
+    set max_distance(arg0) {
+        wasm.__wbg_set_orbitcamerabounds_max_distance(this.ptr, !isLikeNone(arg0), isLikeNone(arg0) ? 0 : arg0);
+    }
+    /**
+    * The `min_pitch` can only be between `]-PI / 2, 0]` due to mathematical reasons.
+    */
+    get min_pitch() {
+        var ret = wasm.__wbg_get_orbitcamerabounds_min_pitch(this.ptr);
+        return ret;
+    }
+    /**
+    * The `min_pitch` can only be between `]-PI / 2, 0]` due to mathematical reasons.
+    * @param {number} arg0
+    */
+    set min_pitch(arg0) {
+        wasm.__wbg_set_orbitcamerabounds_min_pitch(this.ptr, arg0);
+    }
+    /**
+    * The `min_pitch` can only be between `]0, PI / 2]` due to mathematical reasons.
+    */
+    get max_pitch() {
+        var ret = wasm.__wbg_get_orbitcamerabounds_max_pitch(this.ptr);
+        return ret;
+    }
+    /**
+    * The `min_pitch` can only be between `]0, PI / 2]` due to mathematical reasons.
+    * @param {number} arg0
+    */
+    set max_pitch(arg0) {
+        wasm.__wbg_set_orbitcamerabounds_max_pitch(this.ptr, arg0);
+    }
+    /**
+    * If set the yaw angle will be constrained. The constrain should be in the
+    * interval `[-PI, 0]`.
+    */
+    get min_yaw() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.__wbg_get_orbitcamerabounds_min_yaw(retptr, this.ptr);
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getFloat32Memory0()[retptr / 4 + 1];
+            return r0 === 0 ? undefined : r1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+    * If set the yaw angle will be constrained. The constrain should be in the
+    * interval `[-PI, 0]`.
+    * @param {number | undefined} arg0
+    */
+    set min_yaw(arg0) {
+        wasm.__wbg_set_orbitcamerabounds_min_yaw(this.ptr, !isLikeNone(arg0), isLikeNone(arg0) ? 0 : arg0);
+    }
+    /**
+    * If set the yaw angle will be constrained. The constrain should be in the
+    * interval `[0, PI]`.
+    */
+    get max_yaw() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.__wbg_get_orbitcamerabounds_max_yaw(retptr, this.ptr);
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getFloat32Memory0()[retptr / 4 + 1];
+            return r0 === 0 ? undefined : r1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+    * If set the yaw angle will be constrained. The constrain should be in the
+    * interval `[0, PI]`.
+    * @param {number | undefined} arg0
+    */
+    set max_yaw(arg0) {
+        wasm.__wbg_set_orbitcamerabounds_max_yaw(this.ptr, !isLikeNone(arg0), isLikeNone(arg0) ? 0 : arg0);
+    }
+}
+/**
+* The state holds all data about the rendering cycle and the objects that are drawn to the screen.
+*/
+export class State {
+
+    __destroy_into_raw() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_state_free(ptr);
+    }
+    /**
+    * The width of the wgpu renderer in pixels.
+    */
+    get width() {
+        var ret = wasm.__wbg_get_state_width(this.ptr);
+        return ret >>> 0;
+    }
+    /**
+    * The width of the wgpu renderer in pixels.
+    * @param {number} arg0
+    */
+    set width(arg0) {
+        wasm.__wbg_set_state_width(this.ptr, arg0);
+    }
+    /**
+    * The height of the wgpu renderer in pixels.
+    */
+    get height() {
+        var ret = wasm.__wbg_get_state_height(this.ptr);
+        return ret >>> 0;
+    }
+    /**
+    * The height of the wgpu renderer in pixels.
+    * @param {number} arg0
+    */
+    set height(arg0) {
+        wasm.__wbg_set_state_height(this.ptr, arg0);
+    }
+    /**
+    * The camera used for rendering the scene.
+    */
+    get camera() {
+        var ret = wasm.__wbg_get_state_camera(this.ptr);
+        return OrbitCamera.__wrap(ret);
+    }
+    /**
+    * The camera used for rendering the scene.
+    * @param {OrbitCamera} arg0
+    */
+    set camera(arg0) {
+        _assertClass(arg0, OrbitCamera);
+        var ptr0 = arg0.ptr;
+        arg0.ptr = 0;
+        wasm.__wbg_set_state_camera(this.ptr, ptr0);
+    }
+}
+/**
+* A three-dimensional vector mainly used to pass data via `wasm-bindgen`.
+*/
+export class Vector3 {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Vector3.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_vector3_free(ptr);
+    }
+    /**
+    */
+    get x() {
+        var ret = wasm.__wbg_get_vector3_x(this.ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set x(arg0) {
+        wasm.__wbg_set_vector3_x(this.ptr, arg0);
+    }
+    /**
+    */
+    get y() {
+        var ret = wasm.__wbg_get_vector3_y(this.ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set y(arg0) {
+        wasm.__wbg_set_vector3_y(this.ptr, arg0);
+    }
+    /**
+    */
+    get z() {
+        var ret = wasm.__wbg_get_vector3_z(this.ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set z(arg0) {
+        wasm.__wbg_set_vector3_z(this.ptr, arg0);
+    }
+}
+/**
+* Renders to a canvas using the `wgpu` **WebGL2** backend.
 */
 export class WebGLRenderer {
+
+    static __wrap(ptr) {
+        const obj = Object.create(WebGLRenderer.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
 
     __destroy_into_raw() {
         const ptr = this.ptr;
@@ -304,11 +699,49 @@ export class WebGLRenderer {
     /**
     * Create a new [WebGLRenderer] instance for the given canvas id.
     * @param {string} canvas_id
+    * @param {number} width
+    * @param {number} height
     */
-    constructor(canvas_id) {
+    constructor(canvas_id, width, height) {
         var ptr0 = passStringToWasm0(canvas_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
-        wasm.webglrenderer_create(ptr0, len0);
+        var ret = wasm.webglrenderer_create(ptr0, len0, width, height);
+        return WebGLRenderer.__wrap(ret);
+    }
+    /**
+    */
+    update() {
+        wasm.webglrenderer_update(this.ptr);
+    }
+    /**
+    */
+    render() {
+        wasm.webglrenderer_render(this.ptr);
+    }
+    /**
+    * @param {number} new_width
+    * @param {number} new_height
+    */
+    resize(new_width, new_height) {
+        wasm.webglrenderer_resize(this.ptr, new_width, new_height);
+    }
+    /**
+    * @param {number} delta
+    */
+    add_distance(delta) {
+        wasm.webglrenderer_add_distance(this.ptr, delta);
+    }
+    /**
+    * @param {number} delta
+    */
+    add_pitch(delta) {
+        wasm.webglrenderer_add_pitch(this.ptr, delta);
+    }
+    /**
+    * @param {number} delta
+    */
+    add_yaw(delta) {
+        wasm.webglrenderer_add_yaw(this.ptr, delta);
     }
 }
 
@@ -349,28 +782,15 @@ async function init(input) {
     }
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+        takeObject(arg0);
+    };
     imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
         var ret = getObject(arg0);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
-        takeObject(arg0);
-    };
-    imports.wbg.__wbindgen_cb_drop = function(arg0) {
-        const obj = takeObject(arg0).original;
-        if (obj.cnt-- == 1) {
-            obj.a = 0;
-            return true;
-        }
-        var ret = false;
-        return ret;
-    };
     imports.wbg.__wbg_log_ca5ce4eb1195cf4b = function(arg0, arg1) {
         console.log(getStringFromWasm0(arg0, arg1));
-    };
-    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
-        var ret = getStringFromWasm0(arg0, arg1);
-        return addHeapObject(ret);
     };
     imports.wbg.__wbg_new_693216e109162396 = function() {
         var ret = new Error();
@@ -390,16 +810,20 @@ async function init(input) {
             wasm.__wbindgen_free(arg0, arg1);
         }
     };
-    imports.wbg.__wbindgen_number_get = function(arg0, arg1) {
-        const obj = getObject(arg1);
-        var ret = typeof(obj) === 'number' ? obj : undefined;
-        getFloat64Memory0()[arg0 / 8 + 1] = isLikeNone(ret) ? 0 : ret;
-        getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
+    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
+        var ret = getStringFromWasm0(arg0, arg1);
+        return addHeapObject(ret);
     };
     imports.wbg.__wbindgen_boolean_get = function(arg0) {
         const v = getObject(arg0);
         var ret = typeof(v) === 'boolean' ? (v ? 1 : 0) : 2;
         return ret;
+    };
+    imports.wbg.__wbindgen_number_get = function(arg0, arg1) {
+        const obj = getObject(arg1);
+        var ret = typeof(obj) === 'number' ? obj : undefined;
+        getFloat64Memory0()[arg0 / 8 + 1] = isLikeNone(ret) ? 0 : ret;
+        getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
     };
     imports.wbg.__wbindgen_number_new = function(arg0) {
         var ret = arg0;
@@ -788,102 +1212,9 @@ async function init(input) {
         var ret = getObject(arg0).document;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_innerWidth_167a80c24724be51 = function() { return handleError(function (arg0) {
-        var ret = getObject(arg0).innerWidth;
-        return addHeapObject(ret);
-    }, arguments) };
-    imports.wbg.__wbg_innerHeight_1b26d1f74fcc8287 = function() { return handleError(function (arg0) {
-        var ret = getObject(arg0).innerHeight;
-        return addHeapObject(ret);
-    }, arguments) };
-    imports.wbg.__wbg_devicePixelRatio_128c7b747be8bb87 = function(arg0) {
-        var ret = getObject(arg0).devicePixelRatio;
-        return ret;
-    };
-    imports.wbg.__wbg_cancelAnimationFrame_ac2f82caea825778 = function() { return handleError(function (arg0, arg1) {
-        getObject(arg0).cancelAnimationFrame(arg1);
-    }, arguments) };
-    imports.wbg.__wbg_matchMedia_e58b5c27806db9ab = function() { return handleError(function (arg0, arg1, arg2) {
-        var ret = getObject(arg0).matchMedia(getStringFromWasm0(arg1, arg2));
-        return isLikeNone(ret) ? 0 : addHeapObject(ret);
-    }, arguments) };
-    imports.wbg.__wbg_requestAnimationFrame_4614b7cdb59d7a59 = function() { return handleError(function (arg0, arg1) {
-        var ret = getObject(arg0).requestAnimationFrame(getObject(arg1));
-        return ret;
-    }, arguments) };
-    imports.wbg.__wbg_get_bddf65ccd91301bf = function(arg0, arg1, arg2) {
-        var ret = getObject(arg0)[getStringFromWasm0(arg1, arg2)];
-        return isLikeNone(ret) ? 0 : addHeapObject(ret);
-    };
-    imports.wbg.__wbg_clearTimeout_60252f615c569bcf = function(arg0, arg1) {
-        getObject(arg0).clearTimeout(arg1);
-    };
-    imports.wbg.__wbg_setTimeout_56c7fbf887ce45de = function() { return handleError(function (arg0, arg1, arg2) {
-        var ret = getObject(arg0).setTimeout(getObject(arg1), arg2);
-        return ret;
-    }, arguments) };
-    imports.wbg.__wbg_x_52476bf35a5ce866 = function(arg0) {
-        var ret = getObject(arg0).x;
-        return ret;
-    };
-    imports.wbg.__wbg_y_28e6f92ce0e6c937 = function(arg0) {
-        var ret = getObject(arg0).y;
-        return ret;
-    };
     imports.wbg.__wbg_drawBuffersWEBGL_3a23d94accf767a7 = function(arg0, arg1) {
         getObject(arg0).drawBuffersWEBGL(getObject(arg1));
     };
-    imports.wbg.__wbg_clientX_2683f412434970b1 = function(arg0) {
-        var ret = getObject(arg0).clientX;
-        return ret;
-    };
-    imports.wbg.__wbg_clientY_99740677fc53452d = function(arg0) {
-        var ret = getObject(arg0).clientY;
-        return ret;
-    };
-    imports.wbg.__wbg_offsetX_baa0a9ba3cf6f9df = function(arg0) {
-        var ret = getObject(arg0).offsetX;
-        return ret;
-    };
-    imports.wbg.__wbg_offsetY_fddde19a00b28ba1 = function(arg0) {
-        var ret = getObject(arg0).offsetY;
-        return ret;
-    };
-    imports.wbg.__wbg_ctrlKey_d99fb5e7086acf43 = function(arg0) {
-        var ret = getObject(arg0).ctrlKey;
-        return ret;
-    };
-    imports.wbg.__wbg_shiftKey_e44a962022696c0e = function(arg0) {
-        var ret = getObject(arg0).shiftKey;
-        return ret;
-    };
-    imports.wbg.__wbg_altKey_546c03321269be7b = function(arg0) {
-        var ret = getObject(arg0).altKey;
-        return ret;
-    };
-    imports.wbg.__wbg_metaKey_35e804c8036701a3 = function(arg0) {
-        var ret = getObject(arg0).metaKey;
-        return ret;
-    };
-    imports.wbg.__wbg_button_14d198c56316b728 = function(arg0) {
-        var ret = getObject(arg0).button;
-        return ret;
-    };
-    imports.wbg.__wbg_buttons_0a3e5b1c27c49b89 = function(arg0) {
-        var ret = getObject(arg0).buttons;
-        return ret;
-    };
-    imports.wbg.__wbg_movementX_37bbb97f7db4e351 = function(arg0) {
-        var ret = getObject(arg0).movementX;
-        return ret;
-    };
-    imports.wbg.__wbg_movementY_1e0ed4215257fecb = function(arg0) {
-        var ret = getObject(arg0).movementY;
-        return ret;
-    };
-    imports.wbg.__wbg_setProperty_27800a80982863e0 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
-        getObject(arg0).setProperty(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
-    }, arguments) };
     imports.wbg.__wbg_bindVertexArrayOES_7d58a43c6ff9528d = function(arg0, arg1) {
         getObject(arg0).bindVertexArrayOES(getObject(arg1));
     };
@@ -894,60 +1225,18 @@ async function init(input) {
     imports.wbg.__wbg_deleteVertexArrayOES_37b9bb6a20744243 = function(arg0, arg1) {
         getObject(arg0).deleteVertexArrayOES(getObject(arg1));
     };
-    imports.wbg.__wbg_deltaX_ff98873a8ce9e156 = function(arg0) {
-        var ret = getObject(arg0).deltaX;
-        return ret;
-    };
-    imports.wbg.__wbg_deltaY_48411dcaf81863cf = function(arg0) {
-        var ret = getObject(arg0).deltaY;
-        return ret;
-    };
-    imports.wbg.__wbg_deltaMode_e5f4db662363d971 = function(arg0) {
-        var ret = getObject(arg0).deltaMode;
-        return ret;
-    };
-    imports.wbg.__wbg_pointerId_f3b186037b20027e = function(arg0) {
-        var ret = getObject(arg0).pointerId;
-        return ret;
-    };
     imports.wbg.__wbg_instanceof_HtmlCanvasElement_f6c37daa8caa628a = function(arg0) {
         var ret = getObject(arg0) instanceof HTMLCanvasElement;
         return ret;
-    };
-    imports.wbg.__wbg_width_472e3682c7514f2c = function(arg0) {
-        var ret = getObject(arg0).width;
-        return ret;
-    };
-    imports.wbg.__wbg_setwidth_6ffbc02dcd566284 = function(arg0, arg1) {
-        getObject(arg0).width = arg1 >>> 0;
-    };
-    imports.wbg.__wbg_height_1e657c7ba54aba97 = function(arg0) {
-        var ret = getObject(arg0).height;
-        return ret;
-    };
-    imports.wbg.__wbg_setheight_dade0779787da2d7 = function(arg0, arg1) {
-        getObject(arg0).height = arg1 >>> 0;
     };
     imports.wbg.__wbg_getContext_8435deac9a955a68 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
         var ret = getObject(arg0).getContext(getStringFromWasm0(arg1, arg2), getObject(arg3));
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_matches_f5bb35b4e2f2e0f8 = function(arg0) {
-        var ret = getObject(arg0).matches;
-        return ret;
-    };
     imports.wbg.__wbg_now_885ca88fafee0fd1 = function(arg0) {
         var ret = getObject(arg0).now();
         return ret;
     };
-    imports.wbg.__wbg_fullscreenElement_2a99edd42d795384 = function(arg0) {
-        var ret = getObject(arg0).fullscreenElement;
-        return isLikeNone(ret) ? 0 : addHeapObject(ret);
-    };
-    imports.wbg.__wbg_createElement_8a4eea3a05d8804d = function() { return handleError(function (arg0, arg1, arg2) {
-        var ret = getObject(arg0).createElement(getStringFromWasm0(arg1, arg2));
-        return addHeapObject(ret);
-    }, arguments) };
     imports.wbg.__wbg_getElementById_8ef24477d541ac87 = function(arg0, arg1, arg2) {
         var ret = getObject(arg0).getElementById(getStringFromWasm0(arg1, arg2));
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
@@ -956,18 +1245,15 @@ async function init(input) {
         var ret = getObject(arg0).querySelector(getStringFromWasm0(arg1, arg2));
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_getBoundingClientRect_18745abec7ca4344 = function(arg0) {
-        var ret = getObject(arg0).getBoundingClientRect();
-        return addHeapObject(ret);
+    imports.wbg.__wbg_id_a552372456640420 = function(arg0, arg1) {
+        var ret = getObject(arg1).id;
+        var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        getInt32Memory0()[arg0 / 4 + 1] = len0;
+        getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_requestFullscreen_36697c7790cc6e7b = function() { return handleError(function (arg0) {
-        getObject(arg0).requestFullscreen();
-    }, arguments) };
     imports.wbg.__wbg_setAttribute_936a229ff5ccc5c9 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0).setAttribute(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
-    }, arguments) };
-    imports.wbg.__wbg_setPointerCapture_a311dcf8d12f5953 = function() { return handleError(function (arg0, arg1) {
-        getObject(arg0).setPointerCapture(arg1);
     }, arguments) };
     imports.wbg.__wbg_bufferData_f23ccf9ad7a3a571 = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).bufferData(arg1 >>> 0, arg2, arg3 >>> 0);
@@ -1192,27 +1478,6 @@ async function init(input) {
     imports.wbg.__wbg_viewport_22eb522b17716ae0 = function(arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0).viewport(arg1, arg2, arg3, arg4);
     };
-    imports.wbg.__wbg_error_36336804f207f034 = function(arg0, arg1) {
-        console.error(getObject(arg0), getObject(arg1));
-    };
-    imports.wbg.__wbg_style_4495258c34c8479e = function(arg0) {
-        var ret = getObject(arg0).style;
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbg_target_8eac1b471e53114d = function(arg0) {
-        var ret = getObject(arg0).target;
-        return isLikeNone(ret) ? 0 : addHeapObject(ret);
-    };
-    imports.wbg.__wbg_cancelBubble_1d14028d25d9c2d6 = function(arg0) {
-        var ret = getObject(arg0).cancelBubble;
-        return ret;
-    };
-    imports.wbg.__wbg_preventDefault_7a8483e2b1a95a37 = function(arg0) {
-        getObject(arg0).preventDefault();
-    };
-    imports.wbg.__wbg_stopPropagation_36adf718596c5abf = function(arg0) {
-        getObject(arg0).stopPropagation();
-    };
     imports.wbg.__wbg_size_0079ce612c7406b7 = function(arg0) {
         var ret = getObject(arg0).size;
         return ret;
@@ -1237,67 +1502,6 @@ async function init(input) {
     imports.wbg.__wbg_vertexAttribDivisorANGLE_ed8911b2d8ea2238 = function(arg0, arg1, arg2) {
         getObject(arg0).vertexAttribDivisorANGLE(arg1 >>> 0, arg2 >>> 0);
     };
-    imports.wbg.__wbg_addEventListener_de2304ba2cd4ae89 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
-        getObject(arg0).addEventListener(getStringFromWasm0(arg1, arg2), getObject(arg3));
-    }, arguments) };
-    imports.wbg.__wbg_addEventListener_1187d9892750204d = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
-        getObject(arg0).addEventListener(getStringFromWasm0(arg1, arg2), getObject(arg3), getObject(arg4));
-    }, arguments) };
-    imports.wbg.__wbg_removeEventListener_cb28b2b1c2746766 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
-        getObject(arg0).removeEventListener(getStringFromWasm0(arg1, arg2), getObject(arg3));
-    }, arguments) };
-    imports.wbg.__wbg_charCode_a82ff5cee608ab8a = function(arg0) {
-        var ret = getObject(arg0).charCode;
-        return ret;
-    };
-    imports.wbg.__wbg_keyCode_3d61e0508dc1a02a = function(arg0) {
-        var ret = getObject(arg0).keyCode;
-        return ret;
-    };
-    imports.wbg.__wbg_altKey_ae9c9006368ae133 = function(arg0) {
-        var ret = getObject(arg0).altKey;
-        return ret;
-    };
-    imports.wbg.__wbg_ctrlKey_69295095147bf188 = function(arg0) {
-        var ret = getObject(arg0).ctrlKey;
-        return ret;
-    };
-    imports.wbg.__wbg_shiftKey_2332cc226cb1d7ba = function(arg0) {
-        var ret = getObject(arg0).shiftKey;
-        return ret;
-    };
-    imports.wbg.__wbg_metaKey_e14a5ae90d7f57f3 = function(arg0) {
-        var ret = getObject(arg0).metaKey;
-        return ret;
-    };
-    imports.wbg.__wbg_key_06d094c95d0b3a39 = function(arg0, arg1) {
-        var ret = getObject(arg1).key;
-        var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        getInt32Memory0()[arg0 / 4 + 1] = len0;
-        getInt32Memory0()[arg0 / 4 + 0] = ptr0;
-    };
-    imports.wbg.__wbg_code_775ef09c147cac9e = function(arg0, arg1) {
-        var ret = getObject(arg1).code;
-        var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        getInt32Memory0()[arg0 / 4 + 1] = len0;
-        getInt32Memory0()[arg0 / 4 + 0] = ptr0;
-    };
-    imports.wbg.__wbg_getModifierState_70e6a5ea746b65f7 = function(arg0, arg1, arg2) {
-        var ret = getObject(arg0).getModifierState(getStringFromWasm0(arg1, arg2));
-        return ret;
-    };
-    imports.wbg.__wbg_matches_c70c8a01827ffb60 = function(arg0) {
-        var ret = getObject(arg0).matches;
-        return ret;
-    };
-    imports.wbg.__wbg_addListener_5445839f808eedb5 = function() { return handleError(function (arg0, arg1) {
-        getObject(arg0).addListener(getObject(arg1));
-    }, arguments) };
-    imports.wbg.__wbg_removeListener_f36a27450ca3b72e = function() { return handleError(function (arg0, arg1) {
-        getObject(arg0).removeListener(getObject(arg1));
-    }, arguments) };
     imports.wbg.__wbg_get_67189fe0b323d288 = function(arg0, arg1) {
         var ret = getObject(arg0)[arg1 >>> 0];
         return addHeapObject(ret);
@@ -1406,42 +1610,6 @@ async function init(input) {
     };
     imports.wbg.__wbindgen_memory = function() {
         var ret = wasm.memory;
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_closure_wrapper606 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 97, __wbg_adapter_26);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_closure_wrapper608 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 97, __wbg_adapter_29);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_closure_wrapper610 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 97, __wbg_adapter_32);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_closure_wrapper612 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 97, __wbg_adapter_35);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_closure_wrapper614 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 97, __wbg_adapter_38);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_closure_wrapper616 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 97, __wbg_adapter_41);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_closure_wrapper618 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 97, __wbg_adapter_44);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_closure_wrapper620 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 97, __wbg_adapter_47);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_closure_wrapper622 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 97, __wbg_adapter_50);
         return addHeapObject(ret);
     };
 

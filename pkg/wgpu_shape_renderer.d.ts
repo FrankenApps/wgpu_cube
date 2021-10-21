@@ -1,23 +1,216 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* The framework for calling **WebGL** from **WASM**.
+* An [OrbitCamera] only permits rotation of the eye on a spherical shell around a target.
+*/
+export class OrbitCamera {
+  free(): void;
+/**
+* The aspect ratio of the camera.
+*/
+  aspect: number;
+/**
+* The bounds within which the camera can be moved.
+*/
+  bounds: OrbitCameraBounds;
+/**
+* The distance of the eye from the target.
+*/
+  distance: number;
+/**
+* The field of view of the camera.
+*/
+  fovy: number;
+/**
+* The pitch angle in radians.
+*/
+  pitch: number;
+/**
+* The target of the orbit camera.
+*/
+  target: Vector3;
+/**
+* The cameras' up vector.
+*/
+  up: Vector3;
+/**
+* The yaw angle in radians.
+*/
+  yaw: number;
+/**
+* The far clipping plane of the camera.
+*/
+  zfar: number;
+/**
+* The near clipping plane of the camera.
+*/
+  znear: number;
+}
+/**
+* The boundaries for how an [OrbitCamera] can be rotated.
+*/
+export class OrbitCameraBounds {
+  free(): void;
+/**
+* If set it is not possible to move the camera further from the target
+* than the specified amount.
+*/
+  max_distance?: number;
+/**
+* The `min_pitch` can only be between `]0, PI / 2]` due to mathematical reasons.
+*/
+  max_pitch: number;
+/**
+* If set the yaw angle will be constrained. The constrain should be in the
+* interval `[0, PI]`.
+*/
+  max_yaw?: number;
+/**
+* The minimum distance between the eye and the target.
+* This should not be negative. In order to ensure this the minimum distance
+* should never be smaller than [f32::EPSILON].
+*/
+  min_distance?: number;
+/**
+* The `min_pitch` can only be between `]-PI / 2, 0]` due to mathematical reasons.
+*/
+  min_pitch: number;
+/**
+* If set the yaw angle will be constrained. The constrain should be in the
+* interval `[-PI, 0]`.
+*/
+  min_yaw?: number;
+}
+/**
+* The state holds all data about the rendering cycle and the objects that are drawn to the screen.
+*/
+export class State {
+  free(): void;
+/**
+* The camera used for rendering the scene.
+*/
+  camera: OrbitCamera;
+/**
+* The height of the wgpu renderer in pixels.
+*/
+  height: number;
+/**
+* The width of the wgpu renderer in pixels.
+*/
+  width: number;
+}
+/**
+* A three-dimensional vector mainly used to pass data via `wasm-bindgen`.
+*/
+export class Vector3 {
+  free(): void;
+/**
+*/
+  x: number;
+/**
+*/
+  y: number;
+/**
+*/
+  z: number;
+}
+/**
+* Renders to a canvas using the `wgpu` **WebGL2** backend.
 */
 export class WebGLRenderer {
   free(): void;
 /**
 * Create a new [WebGLRenderer] instance for the given canvas id.
 * @param {string} canvas_id
+* @param {number} width
+* @param {number} height
 */
-  constructor(canvas_id: string);
+  constructor(canvas_id: string, width: number, height: number);
+/**
+*/
+  update(): void;
+/**
+*/
+  render(): void;
+/**
+* @param {number} new_width
+* @param {number} new_height
+*/
+  resize(new_width: number, new_height: number): void;
+/**
+* @param {number} delta
+*/
+  add_distance(delta: number): void;
+/**
+* @param {number} delta
+*/
+  add_pitch(delta: number): void;
+/**
+* @param {number} delta
+*/
+  add_yaw(delta: number): void;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly webglrenderer_create: (a: number, b: number) => void;
+  readonly __wbg_orbitcamera_free: (a: number) => void;
+  readonly __wbg_get_orbitcamera_distance: (a: number) => number;
+  readonly __wbg_set_orbitcamera_distance: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamera_pitch: (a: number) => number;
+  readonly __wbg_set_orbitcamera_pitch: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamera_yaw: (a: number) => number;
+  readonly __wbg_set_orbitcamera_yaw: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamera_target: (a: number) => number;
+  readonly __wbg_set_orbitcamera_target: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamera_up: (a: number) => number;
+  readonly __wbg_set_orbitcamera_up: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamera_bounds: (a: number) => number;
+  readonly __wbg_set_orbitcamera_bounds: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamera_aspect: (a: number) => number;
+  readonly __wbg_set_orbitcamera_aspect: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamera_fovy: (a: number) => number;
+  readonly __wbg_set_orbitcamera_fovy: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamera_znear: (a: number) => number;
+  readonly __wbg_set_orbitcamera_znear: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamera_zfar: (a: number) => number;
+  readonly __wbg_set_orbitcamera_zfar: (a: number, b: number) => void;
+  readonly __wbg_orbitcamerabounds_free: (a: number) => void;
+  readonly __wbg_get_orbitcamerabounds_min_distance: (a: number, b: number) => void;
+  readonly __wbg_set_orbitcamerabounds_min_distance: (a: number, b: number, c: number) => void;
+  readonly __wbg_get_orbitcamerabounds_max_distance: (a: number, b: number) => void;
+  readonly __wbg_set_orbitcamerabounds_max_distance: (a: number, b: number, c: number) => void;
+  readonly __wbg_get_orbitcamerabounds_min_pitch: (a: number) => number;
+  readonly __wbg_set_orbitcamerabounds_min_pitch: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamerabounds_max_pitch: (a: number) => number;
+  readonly __wbg_set_orbitcamerabounds_max_pitch: (a: number, b: number) => void;
+  readonly __wbg_get_orbitcamerabounds_min_yaw: (a: number, b: number) => void;
+  readonly __wbg_set_orbitcamerabounds_min_yaw: (a: number, b: number, c: number) => void;
+  readonly __wbg_get_orbitcamerabounds_max_yaw: (a: number, b: number) => void;
+  readonly __wbg_set_orbitcamerabounds_max_yaw: (a: number, b: number, c: number) => void;
+  readonly __wbg_vector3_free: (a: number) => void;
+  readonly __wbg_get_vector3_x: (a: number) => number;
+  readonly __wbg_set_vector3_x: (a: number, b: number) => void;
+  readonly __wbg_get_vector3_y: (a: number) => number;
+  readonly __wbg_set_vector3_y: (a: number, b: number) => void;
+  readonly __wbg_get_vector3_z: (a: number) => number;
+  readonly __wbg_set_vector3_z: (a: number, b: number) => void;
+  readonly __wbg_state_free: (a: number) => void;
+  readonly __wbg_get_state_width: (a: number) => number;
+  readonly __wbg_set_state_width: (a: number, b: number) => void;
+  readonly __wbg_get_state_height: (a: number) => number;
+  readonly __wbg_set_state_height: (a: number, b: number) => void;
+  readonly __wbg_get_state_camera: (a: number) => number;
+  readonly __wbg_set_state_camera: (a: number, b: number) => void;
   readonly __wbg_webglrenderer_free: (a: number) => void;
+  readonly webglrenderer_create: (a: number, b: number, c: number, d: number) => number;
+  readonly webglrenderer_update: (a: number) => void;
+  readonly webglrenderer_render: (a: number) => void;
+  readonly webglrenderer_resize: (a: number, b: number, c: number) => void;
+  readonly webglrenderer_add_distance: (a: number, b: number) => void;
+  readonly webglrenderer_add_pitch: (a: number, b: number) => void;
+  readonly webglrenderer_add_yaw: (a: number, b: number) => void;
   readonly wgpu_render_pass_set_pipeline: (a: number, b: number) => void;
   readonly wgpu_render_pass_set_bind_group: (a: number, b: number, c: number, d: number, e: number) => void;
   readonly wgpu_render_pass_set_vertex_buffer: (a: number, b: number, c: number, d: number, e: number) => void;
@@ -65,9 +258,7 @@ export interface InitOutput {
   readonly wgpu_render_bundle_push_debug_group: (a: number, b: number) => void;
   readonly __wbindgen_malloc: (a: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number) => number;
-  readonly __wbindgen_export_2: WebAssembly.Table;
-  readonly _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h08651bcb6c81b8cf: (a: number, b: number, c: number) => void;
-  readonly _dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__he7fc69cd297851d1: (a: number, b: number) => void;
+  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number) => void;
   readonly __wbindgen_exn_store: (a: number) => void;
 }
