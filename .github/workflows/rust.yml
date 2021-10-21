@@ -28,7 +28,8 @@ jobs:
            cp pkg/wgpu_shape_renderer.d.ts www/pkg/wgpu_shape_renderer.d.ts &&
            cp pkg/wgpu_shape_renderer.js www/pkg/wgpu_shape_renderer.js
     - name: Copy HTML template
-      run: cp index.html www/index.html
+      run: cp index.html www/index.html &&
+           cp favicon.png www/favicon.png
     - name: Deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v3
       with:

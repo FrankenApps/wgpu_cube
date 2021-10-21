@@ -1,2 +1,3 @@
 [build]
-#target = "wasm32-unknown-unknown" # Uncomment this line and reload workspace, to get code completion for wasm target: https://github.com/rust-analyzer/rust-analyzer/pull/8774
+# Uncomment the next line and reload rust-analyzer workspace, to get code completion for wasm target: https://github.com/rust-analyzer/rust-analyzer/pull/8774
+#target = "wasm32-unknown-unknown"

@@ -57,9 +57,11 @@ fn main() {
                 } => *control_flow = ControlFlow::Exit,
                 WindowEvent::Resized(physical_size) => {
                     state.resize(physical_size.width, physical_size.height);
+                    window.request_redraw();
                 }
                 WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                     state.resize(new_inner_size.width, new_inner_size.height);
+                    window.request_redraw();
                 }
                 _ => {}
             },
@@ -71,7 +73,10 @@ fn main() {
                 match state.render() {
                     Ok(_) => {}
                     // Reconfigure the surface if lost
-                    Err(wgpu::SurfaceError::Lost) => state.resize(state.width, state.height),
+                    Err(wgpu::SurfaceError::Lost) => {
+                        state.resize(state.width, state.height);
+                        window.request_redraw();
+                    },
                     // The system is out of memory, we should probably quit
                     Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
                     // All other errors (Outdated, Timeout) should be resolved by the next frame
