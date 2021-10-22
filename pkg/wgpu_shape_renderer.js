@@ -1212,9 +1212,6 @@ async function init(input) {
         var ret = getObject(arg0).document;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_drawBuffersWEBGL_3a23d94accf767a7 = function(arg0, arg1) {
-        getObject(arg0).drawBuffersWEBGL(getObject(arg1));
-    };
     imports.wbg.__wbg_bindVertexArrayOES_7d58a43c6ff9528d = function(arg0, arg1) {
         getObject(arg0).bindVertexArrayOES(getObject(arg1));
     };
@@ -1224,6 +1221,9 @@ async function init(input) {
     };
     imports.wbg.__wbg_deleteVertexArrayOES_37b9bb6a20744243 = function(arg0, arg1) {
         getObject(arg0).deleteVertexArrayOES(getObject(arg1));
+    };
+    imports.wbg.__wbg_drawBuffersWEBGL_3a23d94accf767a7 = function(arg0, arg1) {
+        getObject(arg0).drawBuffersWEBGL(getObject(arg1));
     };
     imports.wbg.__wbg_instanceof_HtmlCanvasElement_f6c37daa8caa628a = function(arg0) {
         var ret = getObject(arg0) instanceof HTMLCanvasElement;
