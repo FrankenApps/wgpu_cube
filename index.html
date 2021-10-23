@@ -62,7 +62,7 @@
             canvas.addEventListener('wheel', e => {
                 e.preventDefault();
 
-                state.add_distance(e.deltaY * mouse_speed);
+                state.add_distance(e.deltaY * zoom_speed);
                 state.update();
                 state.render();
             });
