@@ -12,9 +12,9 @@ pub struct Texture {
 
 impl Texture {
     /// Creates a new texture from a byte array.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `device`: The wgpu device for which the texture will be generated.
     /// * `queue`: The wgpu queue for which the texture will be generated.
     /// * `bytes`: The byte array containing the image / texture.
@@ -30,9 +30,9 @@ impl Texture {
     }
 
     /// Creates a new texture from a [image::DynamicImage].
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `device`: The wgpu device for which the texture will be generated.
     /// * `queue`: The wgpu queue for which the texture will be generated.
     /// * `image`: The source [image::DynamicImage] of the new texture.
@@ -96,9 +96,9 @@ impl Texture {
     }
 
     /// Creates a new depth texture.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `device`: The wgpu device for which the texture will be generated.
     /// * `config`: The wgpu surface configuration for which the texture will be generated.
     /// * `label`: The label of the texture.
@@ -119,8 +119,7 @@ impl Texture {
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::Depth32Float,
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
-                | wgpu::TextureUsages::TEXTURE_BINDING,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
         };
         let texture = device.create_texture(&desc);
 

@@ -147,7 +147,11 @@ impl OrbitCamera {
 
     /// Updates the camera after changing `distance`, `pitch` or `yaw`.
     fn update(&mut self) {
-        self.eye = Vector3::from_vec3(calculate_cartesian_eye_position(self.pitch, self.yaw, self.distance));
+        self.eye = Vector3::from_vec3(calculate_cartesian_eye_position(
+            self.pitch,
+            self.yaw,
+            self.distance,
+        ));
     }
 }
 

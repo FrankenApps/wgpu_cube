@@ -28,7 +28,7 @@ impl Vertex {
                     offset: mem::size_of::<[f32; 5]>() as wgpu::BufferAddress,
                     shader_location: 2,
                     format: wgpu::VertexFormat::Float32x3,
-                }
+                },
             ],
         }
     }

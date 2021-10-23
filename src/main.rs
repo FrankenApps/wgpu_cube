@@ -76,7 +76,7 @@ fn main() {
                     Err(wgpu::SurfaceError::Lost) => {
                         state.resize(state.width, state.height);
                         window.request_redraw();
-                    },
+                    }
                     // The system is out of memory, we should probably quit
                     Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
                     // All other errors (Outdated, Timeout) should be resolved by the next frame

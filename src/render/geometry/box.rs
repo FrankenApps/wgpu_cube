@@ -29,163 +29,178 @@ pub fn get_box_vertecies(
 
     // Vertecies for a box
     let points = vec![
-        transform * Vec4::new(-0.5f32, -0.5f32, 0.5f32, 1.0f32),
-        transform * Vec4::new(-0.5f32, 0.5f32, 0.5f32, 1.0f32),
-        transform * Vec4::new(0.5f32, -0.5f32, 0.5f32, 1.0f32),
-        transform * Vec4::new(0.5f32, 0.5f32, 0.5f32, 1.0f32),
-        transform * Vec4::new(-0.5f32, -0.5f32, -0.5f32, 1.0f32),
-        transform * Vec4::new(-0.5f32, 0.5f32, -0.5f32, 1.0f32),
-        transform * Vec4::new(0.5f32, -0.5f32, -0.5f32, 1.0f32),
-        transform * Vec4::new(0.5f32, 0.5f32, -0.5f32, 1.0f32),
+        homogenous_vector_to_array_3d(transform * Vec4::new(-0.5f32, -0.5f32, 0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(-0.5f32, 0.5f32, 0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(0.5f32, -0.5f32, 0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(0.5f32, 0.5f32, 0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(-0.5f32, -0.5f32, -0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(-0.5f32, 0.5f32, -0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(0.5f32, -0.5f32, -0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(0.5f32, 0.5f32, -0.5f32, 1.0f32)),
     ];
 
     // Calulate normal vectors
-    let front = (points[1].xyz() - points[2].xyz())
-        .cross(points[0].xyz() - points[2].xyz())
-        .normalize();
-    let back = (points[6].xyz() - points[5].xyz())
-        .cross(points[4].xyz() - points[5].xyz())
-        .normalize();
-    let left = (points[1].xyz() - points[0].xyz())
-        .cross(points[4].xyz() - points[0].xyz())
-        .normalize();
-    let right = (points[6].xyz() - points[2].xyz())
-        .cross(points[3].xyz() - points[2].xyz())
-        .normalize();
-    let top = (points[7].xyz() - points[3].xyz())
-        .cross(points[1].xyz() - points[3].xyz())
-        .normalize();
-    let bottom = (points[0].xyz() - points[2].xyz())
-        .cross(points[6].xyz() - points[2].xyz())
-        .normalize();
+    let front = (Vec3::from_slice(&points[1]) - Vec3::from_slice(&points[2]))
+        .cross(Vec3::from_slice(&points[0]) - Vec3::from_slice(&points[2]))
+        .normalize()
+        .to_array();
+    let back = (Vec3::from_slice(&points[6]) - Vec3::from_slice(&points[5]))
+        .cross(Vec3::from_slice(&points[4]) - Vec3::from_slice(&points[5]))
+        .normalize()
+        .to_array();
+    let left = (Vec3::from_slice(&points[1]) - Vec3::from_slice(&points[0]))
+        .cross(Vec3::from_slice(&points[4]) - Vec3::from_slice(&points[0]))
+        .normalize()
+        .to_array();
+    let right = (Vec3::from_slice(&points[6]) - Vec3::from_slice(&points[2]))
+        .cross(Vec3::from_slice(&points[3]) - Vec3::from_slice(&points[2]))
+        .normalize()
+        .to_array();
+    let top = (Vec3::from_slice(&points[7]) - Vec3::from_slice(&points[3]))
+        .cross(Vec3::from_slice(&points[1]) - Vec3::from_slice(&points[3]))
+        .normalize()
+        .to_array();
+    let bottom = (Vec3::from_slice(&points[0]) - Vec3::from_slice(&points[2]))
+        .cross(Vec3::from_slice(&points[6]) - Vec3::from_slice(&points[2]))
+        .normalize()
+        .to_array();
 
-    // Tangents and bittangents will be calculated later.
+    // TODO: Find out why this method does not work.
+    /* let inverse_transform = transform.inverse();
+
+    let front = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(0.0, 0.0, 1.0, 1.0));
+    let back = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(0.0, 0.0, -1.0, 1.0));
+    let left = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(-1.0, 0.0, 0.0, 1.0));
+    let right = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(1.0, 0.0, 0.0, 1.0));
+    let top = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(0.0, 1.0, 0.0, 1.0));
+    let bottom = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(0.0, -1.0, 0.0, 1.0)); */
+
     let vertices = vec![
         // Front
         Vertex {
-            position: points[0].xyz().to_array(),
+            position: points[0],
             tex_coords: [0.0, 1.0],
-            normal: front.to_array(),
+            normal: front,
         },
         Vertex {
-            position: points[2].xyz().to_array(),
+            position: points[2],
             tex_coords: [1.0, 1.0],
-            normal: front.to_array(),
+            normal: front,
         },
         Vertex {
-            position: points[1].xyz().to_array(),
+            position: points[1],
             tex_coords: [0.0, 0.0],
-            normal: front.to_array(),
+            normal: front,
         },
         Vertex {
-            position: points[3].xyz().to_array(),
+            position: points[3],
             tex_coords: [1.0, 0.0],
-            normal: front.to_array(),
+            normal: front,
         },
         // Back
         Vertex {
-            position: points[4].xyz().to_array(),
+            position: points[4],
             tex_coords: [1.0, 1.0],
-            normal: back.to_array(),
+            normal: back,
         },
         Vertex {
-            position: points[6].xyz().to_array(),
+            position: points[6],
             tex_coords: [0.0, 1.0],
-            normal: back.to_array(),
+            normal: back,
         },
         Vertex {
-            position: points[5].xyz().to_array(),
+            position: points[5],
             tex_coords: [1.0, 0.0],
-            normal: back.to_array(),
+            normal: back,
         },
         Vertex {
-            position: points[7].xyz().to_array(),
+            position: points[7],
             tex_coords: [0.0, 0.0],
-            normal: back.to_array(),
+            normal: back,
         },
         // Left
         Vertex {
-            position: points[4].xyz().to_array(),
+            position: points[4],
             tex_coords: [0.0, 1.0],
-            normal: left.to_array(),
+            normal: left,
         },
         Vertex {
-            position: points[5].xyz().to_array(),
+            position: points[5],
             tex_coords: [0.0, 0.0],
-            normal: left.to_array(),
+            normal: left,
         },
         Vertex {
-            position: points[0].xyz().to_array(),
+            position: points[0],
             tex_coords: [1.0, 1.0],
-            normal: left.to_array(),
+            normal: left,
         },
         Vertex {
-            position: points[1].xyz().to_array(),
+            position: points[1],
             tex_coords: [1.0, 0.0],
-            normal: left.to_array(),
+            normal: left,
         },
         // Right
         Vertex {
-            position: points[6].xyz().to_array(),
+            position: points[6],
             tex_coords: [1.0, 1.0],
-            normal: right.to_array(),
+            normal: right,
         },
         Vertex {
-            position: points[7].xyz().to_array(),
+            position: points[7],
             tex_coords: [1.0, 0.0],
-            normal: right.to_array(),
+            normal: right,
         },
         Vertex {
-            position: points[2].xyz().to_array(),
+            position: points[2],
             tex_coords: [0.0, 1.0],
-            normal: right.to_array(),
+            normal: right,
         },
         Vertex {
-            position: points[3].xyz().to_array(),
+            position: points[3],
             tex_coords: [0.0, 0.0],
-            normal: right.to_array(),
+            normal: right,
         },
         // Top
         Vertex {
-            position: points[5].xyz().to_array(),
+            position: points[5],
             tex_coords: [0.0, 0.0],
-            normal: top.to_array(),
+            normal: top,
         },
         Vertex {
-            position: points[1].xyz().to_array(),
+            position: points[1],
             tex_coords: [0.0, 1.0],
-            normal: top.to_array(),
+            normal: top,
         },
         Vertex {
-            position: points[7].xyz().to_array(),
+            position: points[7],
             tex_coords: [1.0, 0.0],
-            normal: top.to_array(),
+            normal: top,
         },
         Vertex {
-            position: points[3].xyz().to_array(),
+            position: points[3],
             tex_coords: [1.0, 1.0],
-            normal: top.to_array(),
+            normal: top,
         },
         // Bottom
         Vertex {
-            position: points[4].xyz().to_array(),
+            position: points[4],
             tex_coords: [0.0, 0.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
         Vertex {
-            position: points[0].xyz().to_array(),
+            position: points[0],
             tex_coords: [1.0, 0.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
         Vertex {
-            position: points[6].xyz().to_array(),
+            position: points[6],
             tex_coords: [0.0, 1.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
         Vertex {
-            position: points[2].xyz().to_array(),
+            position: points[2],
             tex_coords: [1.0, 1.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
     ];
 
@@ -264,235 +279,246 @@ pub fn get_box_vertecies(
 
     // Vertecies for a box
     let points = vec![
-        transform * Vec4::new(-0.5f32, -0.5f32, 0.5f32, 1.0f32),
-        transform * Vec4::new(-0.5f32, 0.5f32, 0.5f32, 1.0f32),
-        transform * Vec4::new(0.5f32, -0.5f32, 0.5f32, 1.0f32),
-        transform * Vec4::new(0.5f32, 0.5f32, 0.5f32, 1.0f32),
-        transform * Vec4::new(-0.5f32, -0.5f32, -0.5f32, 1.0f32),
-        transform * Vec4::new(-0.5f32, 0.5f32, -0.5f32, 1.0f32),
-        transform * Vec4::new(0.5f32, -0.5f32, -0.5f32, 1.0f32),
-        transform * Vec4::new(0.5f32, 0.5f32, -0.5f32, 1.0f32),
+        homogenous_vector_to_array_3d(transform * Vec4::new(-0.5f32, -0.5f32, 0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(-0.5f32, 0.5f32, 0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(0.5f32, -0.5f32, 0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(0.5f32, 0.5f32, 0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(-0.5f32, -0.5f32, -0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(-0.5f32, 0.5f32, -0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(0.5f32, -0.5f32, -0.5f32, 1.0f32)),
+        homogenous_vector_to_array_3d(transform * Vec4::new(0.5f32, 0.5f32, -0.5f32, 1.0f32)),
     ];
 
     // Calulate normal vectors
-    let front = (points[1].xyz() - points[2].xyz())
-        .cross(points[0].xyz() - points[2].xyz())
-        .normalize();
-    let back = (points[6].xyz() - points[5].xyz())
-        .cross(points[4].xyz() - points[5].xyz())
-        .normalize();
-    let left = (points[1].xyz() - points[0].xyz())
-        .cross(points[4].xyz() - points[0].xyz())
-        .normalize();
-    let right = (points[6].xyz() - points[2].xyz())
-        .cross(points[3].xyz() - points[2].xyz())
-        .normalize();
-    let top = (points[7].xyz() - points[3].xyz())
-        .cross(points[1].xyz() - points[3].xyz())
-        .normalize();
-    let bottom = (points[0].xyz() - points[2].xyz())
-        .cross(points[6].xyz() - points[2].xyz())
-        .normalize();
+    let front = (Vec3::from_slice(&points[1]) - Vec3::from_slice(&points[2]))
+        .cross(Vec3::from_slice(&points[0]) - Vec3::from_slice(&points[2]))
+        .normalize()
+        .to_array();
+    let back = (Vec3::from_slice(&points[6]) - Vec3::from_slice(&points[5]))
+        .cross(Vec3::from_slice(&points[4]) - Vec3::from_slice(&points[5]))
+        .normalize()
+        .to_array();
+    let left = (Vec3::from_slice(&points[1]) - Vec3::from_slice(&points[0]))
+        .cross(Vec3::from_slice(&points[4]) - Vec3::from_slice(&points[0]))
+        .normalize()
+        .to_array();
+    let right = (Vec3::from_slice(&points[6]) - Vec3::from_slice(&points[2]))
+        .cross(Vec3::from_slice(&points[3]) - Vec3::from_slice(&points[2]))
+        .normalize()
+        .to_array();
+    let top = (Vec3::from_slice(&points[7]) - Vec3::from_slice(&points[3]))
+        .cross(Vec3::from_slice(&points[1]) - Vec3::from_slice(&points[3]))
+        .normalize()
+        .to_array();
+    let bottom = (Vec3::from_slice(&points[0]) - Vec3::from_slice(&points[2]))
+        .cross(Vec3::from_slice(&points[6]) - Vec3::from_slice(&points[2]))
+        .normalize()
+        .to_array();
 
-    // Tangents and bittangents will be calculated later.
+    // TODO: Find out why this method does not work.
+    /* let inverse_transform = transform.inverse();
+
+    let front = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(0.0, 0.0, 1.0, 1.0));
+    let back = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(0.0, 0.0, -1.0, 1.0));
+    let left = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(-1.0, 0.0, 0.0, 1.0));
+    let right = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(1.0, 0.0, 0.0, 1.0));
+    let top = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(0.0, 1.0, 0.0, 1.0));
+    let bottom = homogenous_vector_to_array_3d(inverse_transform * Vec4::new(0.0, -1.0, 0.0, 1.0)); */
+
     let vertices = vec![
         // Front
         Vertex {
-            position: points[0].xyz().to_array(),
+            position: points[0],
             tex_coords: [0.0, 1.0],
-            normal: front.to_array(),
+            normal: front,
         },
         Vertex {
-            position: points[2].xyz().to_array(),
+            position: points[2],
             tex_coords: [1.0, 1.0],
-            normal: front.to_array(),
+            normal: front,
         },
         Vertex {
-            position: points[3].xyz().to_array(),
+            position: points[3],
             tex_coords: [1.0, 0.0],
-            normal: front.to_array(),
+            normal: front,
         },
-
         Vertex {
-            position: points[0].xyz().to_array(),
+            position: points[0],
             tex_coords: [0.0, 1.0],
-            normal: front.to_array(),
+            normal: front,
         },
         Vertex {
-            position: points[3].xyz().to_array(),
+            position: points[3],
             tex_coords: [1.0, 0.0],
-            normal: front.to_array(),
+            normal: front,
         },
         Vertex {
-            position: points[1].xyz().to_array(),
+            position: points[1],
             tex_coords: [0.0, 0.0],
-            normal: front.to_array(),
+            normal: front,
         },
         // Back
         Vertex {
-            position: points[7].xyz().to_array(),
+            position: points[7],
             tex_coords: [0.0, 0.0],
-            normal: back.to_array(),
+            normal: back,
         },
         Vertex {
-            position: points[6].xyz().to_array(),
+            position: points[6],
             tex_coords: [0.0, 1.0],
-            normal: back.to_array(),
+            normal: back,
         },
         Vertex {
-            position: points[4].xyz().to_array(),
+            position: points[4],
             tex_coords: [1.0, 1.0],
-            normal: back.to_array(),
+            normal: back,
         },
-
         Vertex {
-            position: points[7].xyz().to_array(),
+            position: points[7],
             tex_coords: [0.0, 0.0],
-            normal: back.to_array(),
+            normal: back,
         },
         Vertex {
-            position: points[4].xyz().to_array(),
+            position: points[4],
             tex_coords: [1.0, 1.0],
-            normal: back.to_array(),
+            normal: back,
         },
         Vertex {
-            position: points[5].xyz().to_array(),
+            position: points[5],
             tex_coords: [1.0, 0.0],
-            normal: back.to_array(),
+            normal: back,
         },
         // Left
         Vertex {
-            position: points[1].xyz().to_array(),
+            position: points[1],
             tex_coords: [1.0, 0.0],
-            normal: left.to_array(),
+            normal: left,
         },
         Vertex {
-            position: points[5].xyz().to_array(),
+            position: points[5],
             tex_coords: [0.0, 0.0],
-            normal: left.to_array(),
+            normal: left,
         },
         Vertex {
-            position: points[4].xyz().to_array(),
+            position: points[4],
             tex_coords: [0.0, 1.0],
-            normal: left.to_array(),
+            normal: left,
         },
-
         Vertex {
-            position: points[1].xyz().to_array(),
+            position: points[1],
             tex_coords: [1.0, 0.0],
-            normal: left.to_array(),
+            normal: left,
         },
         Vertex {
-            position: points[4].xyz().to_array(),
+            position: points[4],
             tex_coords: [0.0, 1.0],
-            normal: left.to_array(),
+            normal: left,
         },
         Vertex {
-            position: points[0].xyz().to_array(),
+            position: points[0],
             tex_coords: [1.0, 1.0],
-            normal: left.to_array(),
+            normal: left,
         },
-
         // Right
         Vertex {
-            position: points[6].xyz().to_array(),
+            position: points[6],
             tex_coords: [1.0, 1.0],
-            normal: right.to_array(),
+            normal: right,
         },
         Vertex {
-            position: points[7].xyz().to_array(),
+            position: points[7],
             tex_coords: [1.0, 0.0],
-            normal: right.to_array(),
+            normal: right,
         },
         Vertex {
-            position: points[3].xyz().to_array(),
+            position: points[3],
             tex_coords: [0.0, 0.0],
-            normal: right.to_array(),
+            normal: right,
         },
-
         Vertex {
-            position: points[6].xyz().to_array(),
+            position: points[6],
             tex_coords: [1.0, 1.0],
-            normal: right.to_array(),
+            normal: right,
         },
         Vertex {
-            position: points[3].xyz().to_array(),
+            position: points[3],
             tex_coords: [0.0, 0.0],
-            normal: right.to_array(),
+            normal: right,
         },
         Vertex {
-            position: points[2].xyz().to_array(),
+            position: points[2],
             tex_coords: [0.0, 1.0],
-            normal: right.to_array(),
+            normal: right,
         },
-
         // Top
         Vertex {
-            position: points[5].xyz().to_array(),
+            position: points[5],
             tex_coords: [0.0, 0.0],
-            normal: top.to_array(),
+            normal: top,
         },
         Vertex {
-            position: points[1].xyz().to_array(),
+            position: points[1],
             tex_coords: [0.0, 1.0],
-            normal: top.to_array(),
+            normal: top,
         },
         Vertex {
-            position: points[3].xyz().to_array(),
+            position: points[3],
             tex_coords: [1.0, 1.0],
-            normal: top.to_array(),
+            normal: top,
         },
-
         Vertex {
-            position: points[5].xyz().to_array(),
+            position: points[5],
             tex_coords: [0.0, 0.0],
-            normal: top.to_array(),
+            normal: top,
         },
         Vertex {
-            position: points[3].xyz().to_array(),
+            position: points[3],
             tex_coords: [1.0, 1.0],
-            normal: top.to_array(),
+            normal: top,
         },
         Vertex {
-            position: points[7].xyz().to_array(),
+            position: points[7],
             tex_coords: [1.0, 0.0],
-            normal: top.to_array(),
+            normal: top,
         },
         // Bottom
         Vertex {
-            position: points[2].xyz().to_array(),
+            position: points[2],
             tex_coords: [1.0, 1.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
         Vertex {
-            position: points[0].xyz().to_array(),
+            position: points[0],
             tex_coords: [1.0, 0.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
         Vertex {
-            position: points[4].xyz().to_array(),
+            position: points[4],
             tex_coords: [0.0, 0.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
-        
         Vertex {
-            position: points[2].xyz().to_array(),
+            position: points[2],
             tex_coords: [1.0, 1.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
         Vertex {
-            position: points[4].xyz().to_array(),
+            position: points[4],
             tex_coords: [0.0, 0.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
         Vertex {
-            position: points[6].xyz().to_array(),
+            position: points[6],
             tex_coords: [0.0, 1.0],
-            normal: bottom.to_array(),
+            normal: bottom,
         },
     ];
 
     let indices = vec![];
 
     (vertices, indices)
+}
+
+fn homogenous_vector_to_array_3d(vector: Vec4) -> [f32; 3] {
+    vector.xyz().to_array()
 }

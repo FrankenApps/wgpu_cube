@@ -13,7 +13,7 @@ use crate::render::{
 
 /// The state holds all data about the rendering cycle and the objects that are drawn to the screen.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
-pub struct State{
+pub struct State {
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -48,19 +48,15 @@ pub struct State{
 
 impl State {
     /// Create a new application [State].
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `window`: A struct that implements the trait [raw_window_handle::HasRawWindowHandle].
     /// * `width`: The width of the wgpu renderer in pixels.
     /// * `height`: The height of the wgpu renderer in pixels.
     /// * `camera`: For now this only accepts an [OrbitCamera]. However in the future [State] should
     /// become generic and this should accept any struct that implements [super::camera::Camera].
-    pub async fn new<W>(
-        window: &W,
-        width: u32, 
-        height: u32, 
-        camera: OrbitCamera) -> Self
+    pub async fn new<W>(window: &W, width: u32, height: u32, camera: OrbitCamera) -> Self
     where
         W: raw_window_handle::HasRawWindowHandle,
     {
@@ -91,8 +87,8 @@ impl State {
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface.get_preferred_format(&adapter).unwrap(),
-            width: width,
-            height: height,
+            width,
+            height,
             present_mode: wgpu::PresentMode::Fifo,
         };
         surface.configure(&device, &config);
@@ -254,7 +250,7 @@ impl State {
                 strip_index_format: None,
                 front_face: wgpu::FrontFace::Ccw,
                 cull_mode: Some(wgpu::Face::Back),
-                // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
+                // Requires Features::NON_FILL_POLYGON_MODE
                 polygon_mode: wgpu::PolygonMode::Fill,
                 // Requires Features::DEPTH_CLAMPING
                 clamp_depth: false,
@@ -264,8 +260,8 @@ impl State {
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: wgpu::TextureFormat::Depth32Float,
                 depth_write_enabled: true,
-                depth_compare: wgpu::CompareFunction::Less, // 1.
-                stencil: wgpu::StencilState::default(),     // 2.
+                depth_compare: wgpu::CompareFunction::Less,
+                stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),
             multisample: wgpu::MultisampleState {
@@ -341,7 +337,7 @@ impl State {
     }
 
     /// Resizes the renderer and adjusts the camera aspect.
-    /// 
+    ///
     /// Arguments:
     /// * `new_width`: The new width of the renderer in pixels.
     /// * `new_height`: The new height of the renderer in pixels.

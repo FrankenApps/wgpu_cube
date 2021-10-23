@@ -47,15 +47,19 @@ impl WebGLRenderer {
 
         // The numeric id in the `raw_window_handle::web::WebHandle` has to be set
         // inside the `data-raw-handle` attribute of the canvas.
-        canvas.set_attribute("data-raw-handle", id.as_str()).expect("Failed to assign numeric raw-window-handle id to canvas.");
+        canvas
+            .set_attribute("data-raw-handle", id.as_str())
+            .expect("Failed to assign numeric raw-window-handle id to canvas.");
 
-        let id: u32 = id.parse().expect("Failed to get numeric sequence from canvas id.");
+        let id: u32 = id
+            .parse()
+            .expect("Failed to get numeric sequence from canvas id.");
 
         let wgpu_canvas = WgpuCanvas {
             raw_window_handle: raw_window_handle::web::WebHandle {
                 id: id,
                 ..raw_window_handle::web::WebHandle::empty()
-            }
+            },
         };
 
         let mut camera = OrbitCamera::new(
@@ -70,9 +74,7 @@ impl WebGLRenderer {
         // State::new uses async code, so we're going to wait for it to finish
         let state = pollster::block_on(State::new(&wgpu_canvas, width, height, camera));
 
-        Self {
-            state
-        }
+        Self { state }
     }
 
     #[wasm_bindgen]

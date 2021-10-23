@@ -8,28 +8,24 @@ use wasm_bindgen::prelude::*;
 pub struct Vector3 {
     pub x: f32,
     pub y: f32,
-    pub z: f32
+    pub z: f32,
 }
 
 impl Vector3 {
     /// Creates a new [Vector3].
-    /// 
+    ///
     /// Arguments:
     /// * `x`: The x component of the vector.
     /// * `y`: The y component of the vector.
     /// * `z`: The z component of the vector.
     pub fn new(x: f32, y: f32, z: f32) -> Self {
-        Self {
-            x,
-            y,
-            z
-        }
+        Self { x, y, z }
     }
 
     /// Creates a new [Vector3] from a [Vec3].
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `vec3`: The [Vec3] that will be converted.
     pub fn from_vec3(vec3: Vec3) -> Self {
         Self {
