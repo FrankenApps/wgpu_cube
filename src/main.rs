@@ -31,7 +31,7 @@ fn main() {
     );
     camera.bounds.min_distance = Some(1.1);
 
-    let mut camera_controller = CameraController::new(0.05);
+    let mut camera_controller = CameraController::new(0.025, 0.6);
 
     // State::new uses async code, so we're going to wait for it to finish
     let mut state = pollster::block_on(State::new(&window, size.width, size.height, camera));
