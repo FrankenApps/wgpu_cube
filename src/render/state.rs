@@ -26,7 +26,7 @@ pub struct State {
     pub height: u32,
 
     render_pipeline: wgpu::RenderPipeline,
-    depth_texture: texture::Texture,
+    depth_texture_view: wgpu::TextureView,
     vertex_buffer: wgpu::Buffer,
     #[allow(dead_code)] // Ideally we will switch to indexed meshes once supported everywhere.
     index_buffer: wgpu::Buffer,
@@ -321,7 +321,7 @@ impl State {
             width,
             height,
             render_pipeline,
-            depth_texture,
+            depth_texture_view: depth_texture,
             vertex_buffer,
             index_buffer,
             num_indices,
@@ -340,6 +340,7 @@ impl State {
     /// Resizes the renderer and adjusts the camera aspect.
     ///
     /// Arguments:
+    ///
     /// * `new_width`: The new width of the renderer in pixels.
     /// * `new_height`: The new height of the renderer in pixels.
     pub fn resize(&mut self, new_width: u32, new_height: u32) {
@@ -348,9 +349,8 @@ impl State {
             self.height = new_height;
             self.config.width = new_width;
             self.config.height = new_height;
-            self.depth_texture =
+            self.depth_texture_view =
                 texture::Texture::create_depth_texture(&self.device, &self.config, "depth_texture");
-            println!("{:?}", self.depth_texture.texture);
             self.surface.configure(&self.device, &self.config);
 
             self.camera.aspect = self.config.width as f32 / self.config.height as f32;
@@ -410,7 +410,7 @@ impl State {
                     },
                 }],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                    view: &self.depth_texture.view,
+                    view: &self.depth_texture_view,
                     depth_ops: Some(wgpu::Operations {
                         load: wgpu::LoadOp::Clear(1.0),
                         store: true,
