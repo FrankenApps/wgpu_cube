@@ -104,28 +104,15 @@
                 previousDistance = undefined;
             });
 
-            /* window.addEventListener('resize', () => {
+            window.addEventListener('resize', () => {
                 width = canvas.clientWidth;
                 height = canvas.clientHeight;
                 canvas.width = width;
                 canvas.height = height;
-                // Somehow this makes the WASM backend fail silently.
+                
                 state.resize(width, height);
                 state.update();
                 state.render();
-            }); */
-
-            document.addEventListener('keydown', e => {
-                if (e.keyCode === 32) {
-                    width = canvas.clientWidth;
-                    height = canvas.clientHeight;
-                    canvas.width = width;
-                    canvas.height = height;
-                    // Somehow this makes the WASM backend fail silently.
-                    state.resize(width, height);
-                    state.update();
-                    state.render();
-                }
             });
         }
 
