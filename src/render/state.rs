@@ -11,6 +11,10 @@ use crate::render::{
     vertex::Vertex,
 };
 
+/// The number of samples taken when using multisample anti-aliasing.
+/// Valid values are `1` (no MSAA) or `4`.
+const MSAA_SAMPLE_COUNT: u32 = 4;
+
 /// The state holds all data about the rendering cycle and the objects that are drawn to the screen.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub struct State {
@@ -27,6 +31,7 @@ pub struct State {
 
     render_pipeline: wgpu::RenderPipeline,
     depth_texture_view: wgpu::TextureView,
+    multisampled_framebuffer: wgpu::TextureView,
     vertex_buffer: wgpu::Buffer,
     #[allow(dead_code)] // Ideally we will switch to indexed meshes once supported everywhere.
     index_buffer: wgpu::Buffer,
@@ -60,8 +65,6 @@ impl State {
     where
         W: raw_window_handle::HasRawWindowHandle,
     {
-        // The instance is a handle to our GPU
-        // BackendBit::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU
         let instance = wgpu::Instance::new(wgpu::Backends::all());
         let surface = unsafe { instance.create_surface(window) };
         let adapter = instance
@@ -139,8 +142,8 @@ impl State {
             label: Some("diffuse_bind_group"),
         });
 
-        let depth_texture =
-            texture::Texture::create_depth_texture(&device, &config, "depth_texture");
+        let depth_texture_view =
+            texture::Texture::create_depth_texture(&device, &config, MSAA_SAMPLE_COUNT, "depth_texture");
 
         let mut camera_uniform = CameraUniform::default();
         camera_uniform.update_view_proj(&camera);
@@ -226,6 +229,13 @@ impl State {
                 push_constant_ranges: &[],
             });
 
+        let multisampled_framebuffer = texture::Texture::create_multisampled_framebuffer(
+            &device,
+            &config,
+            MSAA_SAMPLE_COUNT,
+            "multisampled_framebuffer",
+        );
+
         let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Render Pipeline"),
             layout: Some(&render_pipeline_layout),
@@ -266,9 +276,8 @@ impl State {
                 bias: wgpu::DepthBiasState::default(),
             }),
             multisample: wgpu::MultisampleState {
-                count: 1,
-                mask: !0,
-                alpha_to_coverage_enabled: false,
+                count: MSAA_SAMPLE_COUNT,
+                ..Default::default()
             },
         });
 
@@ -321,7 +330,8 @@ impl State {
             width,
             height,
             render_pipeline,
-            depth_texture_view: depth_texture,
+            depth_texture_view,
+            multisampled_framebuffer,
             vertex_buffer,
             index_buffer,
             num_indices,
@@ -349,10 +359,17 @@ impl State {
             self.height = new_height;
             self.config.width = new_width;
             self.config.height = new_height;
-            self.depth_texture_view =
-                texture::Texture::create_depth_texture(&self.device, &self.config, "depth_texture");
-            self.surface.configure(&self.device, &self.config);
 
+            self.depth_texture_view =
+                texture::Texture::create_depth_texture(&self.device, &self.config, MSAA_SAMPLE_COUNT, "depth_texture");
+            self.multisampled_framebuffer = texture::Texture::create_multisampled_framebuffer(
+                &self.device,
+                &self.config,
+                MSAA_SAMPLE_COUNT,
+                "multisampled_framebuffer",
+            );
+
+            self.surface.configure(&self.device, &self.config);
             self.camera.aspect = self.config.width as f32 / self.config.height as f32;
         }
     }
@@ -393,44 +410,59 @@ impl State {
                 label: Some("Render Encoder"),
             });
 
-        {
-            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("Render Pass"),
-                color_attachments: &[wgpu::RenderPassColorAttachment {
-                    view: &view,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.1,
-                            g: 0.2,
-                            b: 0.3,
-                            a: 1.0,
-                        }),
-                        store: true,
-                    },
-                }],
-                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                    view: &self.depth_texture_view,
-                    depth_ops: Some(wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(1.0),
-                        store: true,
-                    }),
-                    stencil_ops: None,
-                }),
-            });
+        // TODO: This should probably be stored in state instead.
+        let clear_color = wgpu::Color {
+            r: 0.1,
+            g: 0.2,
+            b: 0.3,
+            a: 1.0,
+        };
 
-            render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
-            render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
-            render_pass.set_bind_group(2, &self.light_bind_group, &[]);
-            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            #[cfg(feature = "indexed")]
-            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
-            #[cfg(feature = "indexed")]
-            render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
-            #[cfg(not(feature = "indexed"))]
-            render_pass.draw(0..self.num_indices, 0..1);
-        }
+        let rpass_color_attachment = if MSAA_SAMPLE_COUNT == 1 {
+            wgpu::RenderPassColorAttachment {
+                view: &view,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(clear_color),
+                    store: true,
+                },
+            }
+        } else {
+            wgpu::RenderPassColorAttachment {
+                view: &self.multisampled_framebuffer,
+                resolve_target: Some(&view),
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(clear_color),
+                    store: true,
+                },
+            }
+        };
+
+        let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("Render Pass"),
+            color_attachments: &[rpass_color_attachment],
+            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                view: &self.depth_texture_view,
+                depth_ops: Some(wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(1.0),
+                    store: true,
+                }),
+                stencil_ops: None,
+            }),
+        });
+
+        render_pass.set_pipeline(&self.render_pipeline);
+        render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
+        render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
+        render_pass.set_bind_group(2, &self.light_bind_group, &[]);
+        render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+        #[cfg(feature = "indexed")]
+        render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
+        #[cfg(feature = "indexed")]
+        render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
+        #[cfg(not(feature = "indexed"))]
+        render_pass.draw(0..self.num_indices, 0..1);
+        drop(render_pass);
 
         self.queue.submit(std::iter::once(encoder.finish()));
         output.present();
