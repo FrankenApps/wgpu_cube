@@ -9,8 +9,7 @@ pub struct LightUniform {
 
     /// The color of the light.
     ///
-    /// The format is RGB (`[1.0, 1.0, 1.0]` is fully white) and the last item is used for 16 byte padding only.
-    ///
-    /// **Note:** This property is currently not taken into account because there are problems in WebGL2 with it.
+    /// The format is RGB (`[1.0, 1.0, 1.0]` is fully white) and the last item controls the
+    /// strength of the ambient light.
     pub color: [f32; 4],
 }

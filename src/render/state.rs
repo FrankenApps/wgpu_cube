@@ -177,7 +177,7 @@ impl State {
 
         let light_uniform = LightUniform {
             position: [2.0, 6.0, 4.0, 1.0],
-            color: [1.0, 1.0, 1.0, 1.0],
+            color: [1.0, 1.0, 1.0, 0.1],
         };
 
         let light_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
