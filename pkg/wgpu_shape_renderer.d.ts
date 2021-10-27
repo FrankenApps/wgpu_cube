@@ -196,6 +196,13 @@ export interface InitOutput {
   readonly __wbg_set_vector3_y: (a: number, b: number) => void;
   readonly __wbg_get_vector3_z: (a: number) => number;
   readonly __wbg_set_vector3_z: (a: number, b: number) => void;
+  readonly __wbg_state_free: (a: number) => void;
+  readonly __wbg_get_state_width: (a: number) => number;
+  readonly __wbg_set_state_width: (a: number, b: number) => void;
+  readonly __wbg_get_state_height: (a: number) => number;
+  readonly __wbg_set_state_height: (a: number, b: number) => void;
+  readonly __wbg_get_state_camera: (a: number) => number;
+  readonly __wbg_set_state_camera: (a: number, b: number) => void;
   readonly __wbg_webglrenderer_free: (a: number) => void;
   readonly webglrenderer_create: (a: number, b: number, c: number, d: number) => number;
   readonly webglrenderer_update: (a: number) => void;
@@ -204,13 +211,6 @@ export interface InitOutput {
   readonly webglrenderer_add_distance: (a: number, b: number) => void;
   readonly webglrenderer_add_pitch: (a: number, b: number) => void;
   readonly webglrenderer_add_yaw: (a: number, b: number) => void;
-  readonly __wbg_state_free: (a: number) => void;
-  readonly __wbg_get_state_width: (a: number) => number;
-  readonly __wbg_set_state_width: (a: number, b: number) => void;
-  readonly __wbg_get_state_height: (a: number) => number;
-  readonly __wbg_set_state_height: (a: number, b: number) => void;
-  readonly __wbg_get_state_camera: (a: number) => number;
-  readonly __wbg_set_state_camera: (a: number, b: number) => void;
   readonly wgpu_render_pass_set_pipeline: (a: number, b: number) => void;
   readonly wgpu_render_pass_set_bind_group: (a: number, b: number, c: number, d: number, e: number) => void;
   readonly wgpu_render_pass_set_vertex_buffer: (a: number, b: number, c: number, d: number, e: number) => void;
