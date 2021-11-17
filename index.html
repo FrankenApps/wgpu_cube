@@ -19,12 +19,16 @@
         import init, { WebGLRenderer } from './pkg/wgpu_shape_renderer.js';
 
         let isDragRotate = false;
-        const mouse_speed = 0.025;
-        const zoom_speed = 0.01;
+        const MOUSE_SPEED = 0.025;
+        const ZOOM_SPEED = 0.01;
 
         let previousDistance = undefined;
         let touchstartX = undefined;
         let touchstartY = undefined;
+        let wasMultitouchEvent = false;
+
+        const ZOOM_SPEED_TOUCH = 0.001;
+        const TOUCH_SPEED = 0.01;
 
         async function run() {
             await init();
@@ -46,8 +50,8 @@
 
             canvas.addEventListener('mousemove', e => {
                 if (isDragRotate === true) {
-                    state.add_yaw(-e.movementX * mouse_speed);
-                    state.add_pitch(e.movementY * mouse_speed);
+                    state.add_yaw(-e.movementX * MOUSE_SPEED);
+                    state.add_pitch(e.movementY * MOUSE_SPEED);
                     state.update();
                     state.render();
                 }
@@ -62,7 +66,7 @@
             canvas.addEventListener('wheel', e => {
                 e.preventDefault();
 
-                state.add_distance(e.deltaY * zoom_speed);
+                state.add_distance(e.deltaY * ZOOM_SPEED);
                 state.update();
                 state.render();
             });
@@ -76,9 +80,9 @@
 
             canvas.addEventListener('touchmove', e => {
                 e.preventDefault();
-                if (e.touches.length === 1) {
-                    state.add_yaw(-(e.touches[0].pageX - touchstartX) * mouse_speed);
-                    state.add_pitch((e.touches[0].pageY - touchstartY) * mouse_speed);
+                if (e.touches.length === 1 && !wasMultitouchEvent) {
+                    state.add_yaw(-(e.touches[0].pageX - touchstartX) * TOUCH_SPEED);
+                    state.add_pitch((e.touches[0].pageY - touchstartY) * TOUCH_SPEED);
                     state.update();
                     state.render();
 
@@ -86,22 +90,26 @@
                     touchstartY = e.touches[0].pageY;
                 }
                 else if (e.touches.length === 2) {
+                    wasMultitouchEvent = true;
                     let newDistance = Math.hypot((e.touches[0].pageX - e.touches[1].pageX),
                         (e.touches[0].pageY - e.touches[1].pageY));
                     if (previousDistance === undefined) {
                         previousDistance = newDistance;
                     }
                     let delta = newDistance - previousDistance;
-                    if (Math.abs(delta) > 2) {
-                        state.add_distance(-delta * zoom_speed);
+                    if (Math.abs(delta) > 20) {
+                        state.add_distance(-delta * ZOOM_SPEED_TOUCH);
                         state.update();
                         state.render();
                     }
                 }
             });
 
-            canvas.addEventListener('touchend', () => {
-                previousDistance = undefined;
+            canvas.addEventListener('touchend', (e) => {
+                if(e.touches.length == 0) {
+                    previousDistance = undefined;
+                    wasMultitouchEvent = false;
+                }
             });
 
             window.addEventListener('resize', () => {
