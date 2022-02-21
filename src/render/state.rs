@@ -13,9 +13,9 @@ use crate::render::{
 
 /// The number of samples taken when using multisample anti-aliasing.
 /// Valid values are `1` (no MSAA) or `4`.
-#[cfg(msaa)]
+#[cfg(feature = "msaa")]
 const MSAA_SAMPLE_COUNT: u32 = 4;
-#[cfg(not(msaa))]
+#[cfg(not(feature = "msaa"))]
 const MSAA_SAMPLE_COUNT: u32 = 1;
 
 /// The state holds all data about the rendering cycle and the objects that are drawn to the screen.
@@ -70,6 +70,8 @@ impl State {
     {
         let instance = wgpu::Instance::new(wgpu::Backends::all());
         let surface = unsafe { instance.create_surface(window) };
+
+        #[cfg(not(feature = "force_fallback"))]
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
@@ -78,6 +80,16 @@ impl State {
             })
             .await
             .unwrap();
+        #[cfg(feature = "force_fallback")]
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
+                power_preference: wgpu::PowerPreference::default(),
+                compatible_surface: Some(&surface),
+                force_fallback_adapter: true,
+            })
+            .await
+            .unwrap();
+
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {

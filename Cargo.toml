@@ -8,6 +8,7 @@ edition = "2021"
 default = []
 indexed = [] # This is feature gated because it does not work on WebGL2 on Safari.
 msaa = [] # This is feature gated because it does cause a crash when running on DX12 WARP fallback.
+force_fallback = [] # Use software fallback (can be enabled for testing).
 
 [dependencies]
 anyhow = "1.0"
