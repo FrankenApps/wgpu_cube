@@ -13,7 +13,10 @@ use crate::render::{
 
 /// The number of samples taken when using multisample anti-aliasing.
 /// Valid values are `1` (no MSAA) or `4`.
+#[cfg(msaa)]
 const MSAA_SAMPLE_COUNT: u32 = 4;
+#[cfg(not(msaa))]
+const MSAA_SAMPLE_COUNT: u32 = 1;
 
 /// The state holds all data about the rendering cycle and the objects that are drawn to the screen.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
