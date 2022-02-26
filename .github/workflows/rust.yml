@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Update Rust to 2021 edition (will not be neede once virtual-env is deployed to GH-Actions).
+      run: rustup update stable
     - name: Install wasm-pack
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
     - name: Build
