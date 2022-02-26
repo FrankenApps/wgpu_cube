@@ -1,2 +1,8 @@
+# Ignore nasty macos files.
+.DS_Store
+
+# Ignore the build output.
 /target
+
+# Ignore WASM files build using wasm-pack.
 /pkg

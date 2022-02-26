@@ -25,6 +25,7 @@ struct VertexOutput {
     [[location(0)]] tex_coords: vec2<f32>;
     [[location(1)]] world_normal: vec3<f32>;
     [[location(2)]] world_position: vec3<f32>;
+    [[location(3)]] camera_view_pos: vec4<f32>;
 };
 
 [[stage(vertex)]]
@@ -37,6 +38,7 @@ fn vs_main(
     var world_position: vec4<f32> = vec4<f32>(model.position, 1.0);
     out.world_position = world_position.xyz;
     out.clip_position = camera.view_proj * vec4<f32>(model.position, 1.0);
+    out.camera_view_pos = camera.view_pos;
     return out;
 }
 
@@ -64,7 +66,7 @@ fn fs_main(in: VertexOutput) -> [[location(0)]] vec4<f32> {
     //let specular_strength = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
 
     // Blinn-Phong lighting.
-    let view_dir = normalize(camera.view_pos.xyz - in.world_position);
+    let view_dir = normalize(in.camera_view_pos.xyz - in.world_position);
     let half_dir = normalize(view_dir + light_dir);
     let specular_strength = pow(max(dot(in.world_normal, half_dir), 0.0), 32.0);
 
