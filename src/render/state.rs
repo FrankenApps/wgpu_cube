@@ -105,7 +105,7 @@ impl State {
 
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: surface.get_preferred_format(&adapter).unwrap(),
+            format: surface.get_supported_formats(&adapter)[0],
             width,
             height,
             present_mode: wgpu::PresentMode::Fifo,
@@ -154,8 +154,12 @@ impl State {
             label: Some("diffuse_bind_group"),
         });
 
-        let depth_texture_view =
-            texture::Texture::create_depth_texture(&device, &config, MSAA_SAMPLE_COUNT, "depth_texture");
+        let depth_texture_view = texture::Texture::create_depth_texture(
+            &device,
+            &config,
+            MSAA_SAMPLE_COUNT,
+            "depth_texture",
+        );
 
         let mut camera_uniform = CameraUniform::default();
         camera_uniform.update_view_proj(&camera);
@@ -225,7 +229,7 @@ impl State {
             label: None,
         });
 
-        let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         });
@@ -259,14 +263,14 @@ impl State {
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
                 entry_point: "fs_main",
-                targets: &[wgpu::ColorTargetState {
+                targets: &[Some(wgpu::ColorTargetState {
                     format: config.format,
                     blend: Some(wgpu::BlendState {
                         color: wgpu::BlendComponent::REPLACE,
                         alpha: wgpu::BlendComponent::REPLACE,
                     }),
                     write_mask: wgpu::ColorWrites::ALL,
-                }],
+                })],
             }),
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleList,
@@ -373,8 +377,12 @@ impl State {
             self.config.width = new_width;
             self.config.height = new_height;
 
-            self.depth_texture_view =
-                texture::Texture::create_depth_texture(&self.device, &self.config, MSAA_SAMPLE_COUNT, "depth_texture");
+            self.depth_texture_view = texture::Texture::create_depth_texture(
+                &self.device,
+                &self.config,
+                MSAA_SAMPLE_COUNT,
+                "depth_texture",
+            );
             self.multisampled_framebuffer = texture::Texture::create_multisampled_framebuffer(
                 &self.device,
                 &self.config,
@@ -453,7 +461,7 @@ impl State {
 
         let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("Render Pass"),
-            color_attachments: &[rpass_color_attachment],
+            color_attachments: &[Some(rpass_color_attachment)],
             depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                 view: &self.depth_texture_view,
                 depth_ops: Some(wgpu::Operations {

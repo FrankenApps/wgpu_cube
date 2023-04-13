@@ -55,12 +55,12 @@ impl WebGLRenderer {
             .parse()
             .expect("Failed to get numeric sequence from canvas id.");
 
-            let mut handle = raw_window_handle::WebHandle::empty();
-            handle.id = id;
-    
-            let wgpu_canvas = WgpuCanvas {
-                raw_window_handle: handle,
-            };
+        let mut handle = raw_window_handle::WebHandle::empty();
+        handle.id = id;
+
+        let wgpu_canvas = WgpuCanvas {
+            raw_window_handle: handle,
+        };
 
         let mut camera = OrbitCamera::new(
             2.0,
