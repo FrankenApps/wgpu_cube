@@ -10,6 +10,13 @@ indexed = [] # This is feature gated because it does not work on WebGL2 on Safar
 msaa = [] # This is feature gated because it does cause a crash when running on DX12 WARP fallback.
 force_fallback = [] # Use software fallback (can be enabled for testing).
 
+[profile.release]
+lto = true # Use link-time optimization.
+codegen-units = 1 # Enable additional optimizations by building with one codegen-unit only.
+strip = true # Strip symbols.
+opt-level = "z" # This can be enabled to sacrifice some performance for binary size.
+panic = "abort" # No backtrace is needed.
+
 [dependencies]
 anyhow = "1.0"
 bytemuck = { version = "1.4", features = [ "derive" ] }
