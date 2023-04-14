@@ -66,7 +66,7 @@ impl State {
     /// become generic and this should accept any struct that implements [super::camera::Camera].
     pub async fn new<W>(window: &W, width: u32, height: u32, camera: OrbitCamera) -> Self
     where
-        W: raw_window_handle::HasRawWindowHandle,
+        W: raw_window_handle::HasRawWindowHandle + raw_window_handle::HasRawDisplayHandle,
     {
         let instance = wgpu::Instance::new(wgpu::Backends::all());
         let surface = unsafe { instance.create_surface(window) };
@@ -109,6 +109,7 @@ impl State {
             width,
             height,
             present_mode: wgpu::PresentMode::Fifo,
+            alpha_mode: wgpu::CompositeAlphaMode::Auto,
         };
         surface.configure(&device, &config);
 

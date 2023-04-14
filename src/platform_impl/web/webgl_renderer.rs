@@ -55,11 +55,14 @@ impl WebGLRenderer {
             .parse()
             .expect("Failed to get numeric sequence from canvas id.");
 
-        let mut handle = raw_window_handle::WebHandle::empty();
-        handle.id = id;
+        let mut window_handle = raw_window_handle::WebWindowHandle::empty();
+        window_handle.id = id;
+
+        let display_handle = raw_window_handle::WebDisplayHandle::empty();
 
         let wgpu_canvas = WgpuCanvas {
-            raw_window_handle: handle,
+            display_handle,
+            window_handle
         };
 
         let mut camera = OrbitCamera::new(
@@ -109,14 +112,22 @@ impl WebGLRenderer {
     }
 }
 
-/// Implement [raw_window_handle::HasRawWindowHandle] for [web_sys::HtmlCanvasElement].
+/// Implement [raw_window_handle::HasRawWindowHandle] and
+/// [raw_window_handle::HasRawDisplayHandle] for [web_sys::HtmlCanvasElement].
 struct WgpuCanvas {
-    raw_window_handle: raw_window_handle::WebHandle,
+    display_handle: raw_window_handle::WebDisplayHandle,
+
+    window_handle: raw_window_handle::WebWindowHandle,
 }
 
 unsafe impl raw_window_handle::HasRawWindowHandle for WgpuCanvas {
-    /// Returns a `raw_window_handle::RawWindowHandle` for the `canvas`.
     fn raw_window_handle(&self) -> raw_window_handle::RawWindowHandle {
-        raw_window_handle::RawWindowHandle::Web(self.raw_window_handle)
+        raw_window_handle::RawWindowHandle::Web(self.window_handle)
+    }
+}
+
+unsafe impl raw_window_handle::HasRawDisplayHandle for WgpuCanvas {
+    fn raw_display_handle(&self) -> raw_window_handle::RawDisplayHandle {
+        raw_window_handle::RawDisplayHandle::Web(self.display_handle)
     }
 }
