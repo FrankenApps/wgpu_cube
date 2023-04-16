@@ -18,7 +18,7 @@ strip = true # Strip symbols.
 panic = "abort" # No backtrace is needed.
 
 [dependencies]
-bytemuck = { version = "1.4", features = [ "derive" ] }
+bytemuck = { version = "1.13", features = [ "derive" ] }
 glam = { version = "0.23", features = ["bytemuck"] }
 image = "0.24"
 pollster = "0.2"
