@@ -14,12 +14,12 @@ force_fallback = [] # Use software fallback (can be enabled for testing).
 lto = true # Use link-time optimization.
 codegen-units = 1 # Enable additional optimizations by building with one codegen-unit only.
 strip = true # Strip symbols.
-opt-level = "z" # This can be enabled to sacrifice some performance for binary size.
+#opt-level = "z" # This can be enabled to sacrifice some performance for binary size.
 panic = "abort" # No backtrace is needed.
 
 [dependencies]
 bytemuck = { version = "1.4", features = [ "derive" ] }
-glam = { version = "0.19.0", features = ["bytemuck"] }
+glam = { version = "0.23", features = ["bytemuck"] }
 image = "0.24"
 pollster = "0.2"
 raw-window-handle = "0.5.2"
