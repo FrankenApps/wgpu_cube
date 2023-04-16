@@ -1,7 +1,6 @@
 use std::num::NonZeroU32;
 
-use anyhow::*;
-use image::GenericImageView;
+use image::{GenericImageView, ImageError};
 
 /// A texture typically contains one or more images that share the same format.
 pub struct Texture {
@@ -24,9 +23,9 @@ impl Texture {
         queue: &wgpu::Queue,
         bytes: &[u8],
         label: &str,
-    ) -> Result<Self> {
+    ) -> Result<Self, ImageError> {
         let image = image::load_from_memory(bytes)?;
-        Self::from_image(device, queue, &image, Some(label))
+        Ok(Self::from_image(device, queue, &image, Some(label)))
     }
 
     /// Creates a new texture from a [image::DynamicImage].
@@ -42,7 +41,7 @@ impl Texture {
         queue: &wgpu::Queue,
         image: &image::DynamicImage,
         label: Option<&str>,
-    ) -> Result<Self> {
+    ) -> Self {
         let rgba = image.as_rgba8().unwrap();
         let dimensions = image.dimensions();
 
@@ -88,11 +87,11 @@ impl Texture {
             ..Default::default()
         });
 
-        Ok(Self {
+        Self {
             texture,
             view,
             sampler,
-        })
+        }
     }
 
     /// Creates a new depth texture.
