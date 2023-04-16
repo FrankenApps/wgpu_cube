@@ -58,6 +58,7 @@ impl Texture {
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::Rgba8UnormSrgb,
             usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[],
         });
 
         queue.write_texture(
@@ -121,6 +122,7 @@ impl Texture {
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::Depth32Float,
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT, /*  | wgpu::TextureUsages::TEXTURE_BINDING */
+            view_formats: &[],
         };
         let texture = device.create_texture(&desc);
 
@@ -154,6 +156,7 @@ impl Texture {
             format: config.format,
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             label: Some(label),
+            view_formats: &[],
         };
 
         device

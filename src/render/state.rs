@@ -68,8 +68,8 @@ impl State {
     where
         W: raw_window_handle::HasRawWindowHandle + raw_window_handle::HasRawDisplayHandle,
     {
-        let instance = wgpu::Instance::new(wgpu::Backends::all());
-        let surface = unsafe { instance.create_surface(window) };
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor { backends: wgpu::Backends::all(), dx12_shader_compiler: wgpu::Dx12Compiler::Fxc } );
+        let surface = unsafe { instance.create_surface(window).expect("Failed to create surface.") };
 
         #[cfg(not(feature = "force_fallback"))]
         let adapter = instance
@@ -103,13 +103,17 @@ impl State {
             .await
             .unwrap();
 
+        let capabilities = surface.get_capabilities(&adapter);
+        let formats = capabilities.formats;
+
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: surface.get_supported_formats(&adapter)[0],
+            format: *formats.first().expect("No supported texture formats."),
             width,
             height,
             present_mode: wgpu::PresentMode::Fifo,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
+            view_formats: (&[]).to_vec(),
         };
         surface.configure(&device, &config);
 
