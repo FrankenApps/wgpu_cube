@@ -1,5 +1,3 @@
-use std::num::NonZeroU32;
-
 use image::{GenericImageView, ImageError};
 
 /// A texture typically contains one or more images that share the same format.
@@ -71,8 +69,8 @@ impl Texture {
             rgba,
             wgpu::ImageDataLayout {
                 offset: 0,
-                bytes_per_row: NonZeroU32::new(4 * dimensions.0),
-                rows_per_image: NonZeroU32::new(dimensions.1),
+                bytes_per_row: Some(4 * dimensions.0),
+                rows_per_image: Some(dimensions.1),
             },
             size,
         );
